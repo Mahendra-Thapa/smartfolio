@@ -114,13 +114,17 @@ export default function CreatePortfolio() {
   };
 
   const addSkill = () => {
-    const skill = prompt("Enter a skill:");
-    if (skill) {
-      setPortfolio(prev => ({
-        ...prev,
-        skills: [...prev.skills, skill],
-      }));
-    }
+    setPortfolio(prev => ({
+      ...prev,
+      skills: [...prev.skills, ""],
+    }));
+  };
+
+  const updateSkill = (idx: number, value: string) => {
+    setPortfolio(prev => ({
+      ...prev,
+      skills: prev.skills.map((skill, i) => (i === idx ? value : skill)),
+    }));
   };
 
   const removeSkill = (idx: number) => {
@@ -130,33 +134,71 @@ export default function CreatePortfolio() {
     }));
   };
 
+  const addProject = () => {
+    setPortfolio(prev => ({
+      ...prev,
+      projects: [
+        ...prev.projects,
+        {
+          title: "",
+          role: "",
+          duration: "",
+          description: "",
+          link: "",
+          image: "",
+        },
+      ],
+    }));
+  };
+
+  const updateProject = (idx: number, field: string, value: string) => {
+    setPortfolio(prev => ({
+      ...prev,
+      projects: prev.projects.map((project, i) =>
+        i === idx ? { ...project, [field]: value } : project
+      ),
+    }));
+  };
+
+  const removeProject = (idx: number) => {
+    setPortfolio(prev => ({
+      ...prev,
+      projects: prev.projects.filter((_, i) => i !== idx),
+    }));
+  };
+
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white dark:bg-slate-900 flex flex-col">
       <Header />
       <ScrollToTop />
       <div className="flex-1 container mx-auto px-4 py-12">
         {/* Progress Bar */}
         <div className="mb-12 max-w-2xl mx-auto">
-          <div className="flex justify-between mb-4">
+          <div className="relative flex items-center justify-between mb-6">
+            {/* Background line */}
+            <div className="absolute top-1/2 left-0 right-0 h-1 bg-slate-200 -translate-y-1/2"></div>
+
+            {/* Active progress line */}
+            <div
+              className="absolute top-1/2 left-0 h-1 bg-blue-600 -translate-y-1/2 transition-all"
+              style={{ width: `${((step - 1) / 3) * 100}%` }}
+            ></div>
+
             {[1, 2, 3, 4].map(s => (
-              <div key={s} className="flex items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${
-                    s <= step
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-200 text-slate-600"
-                  }`}
-                >
-                  {s}
-                </div>
-                {s < 4 && (
-                  <div
-                    className={`flex-1 h-1 mx-2 ${s < step ? "bg-blue-600" : "bg-slate-200"}`}
-                  ></div>
-                )}
+              <div
+                key={s}
+                // className=""
+                className={`${
+                  s <= step
+                    ? "bg-blue-600 text-white"
+                    : "bg-slate-200 text-slate-600"
+                } relative z-10 w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all`}
+              >
+                {s}
               </div>
             ))}
           </div>
+
           <div className="flex justify-between text-sm text-slate-600">
             <span>Personal Info</span>
             <span>Education & Skills</span>
@@ -168,9 +210,10 @@ export default function CreatePortfolio() {
         {/* Step 1: Personal Information */}
         {step === 1 && (
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-slate-900 mb-8">
+            <h2 className="text-3xl font-bold text-slate-900 mb-8 dark:text-white">
               Personal Information
             </h2>
+            <ScrollToTop />
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
@@ -270,7 +313,8 @@ export default function CreatePortfolio() {
         {/* Step 2: Education & Skills */}
         {step === 2 && (
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-slate-900 mb-8">
+            <ScrollToTop />
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">
               Education & Skills
             </h2>
 
@@ -346,7 +390,7 @@ export default function CreatePortfolio() {
             </div>
 
             {/* Skills */}
-            <div>
+            <div className="mb-12">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-semibold text-slate-900">Skills</h3>
                 <button
@@ -357,18 +401,25 @@ export default function CreatePortfolio() {
                 </button>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="space-y-4">
                 {portfolio.skills.map((skill, idx) => (
                   <div
                     key={idx}
-                    className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full flex items-center gap-2"
+                    className="flex items-center gap-4 p-4 border border-slate-200 rounded-lg"
                   >
-                    {skill}
+                    <input
+                      type="text"
+                      value={skill}
+                      onChange={e => updateSkill(idx, e.target.value)}
+                      placeholder="Skill (e.g. React, Java, UI/UX)"
+                      className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    />
+
                     <button
                       onClick={() => removeSkill(idx)}
-                      className="text-blue-800 hover:text-blue-900 font-bold"
+                      className="text-red-600 hover:text-red-700 font-semibold text-sm"
                     >
-                      ×
+                      Remove
                     </button>
                   </div>
                 ))}
@@ -380,11 +431,12 @@ export default function CreatePortfolio() {
         {/* Step 3: Experience */}
         {step === 3 && (
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-slate-900 mb-8">
+            <ScrollToTop />
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">
               Work Experience
             </h2>
 
-            <div className="mb-6">
+            <div className="mb-6 flex justify-end">
               <button
                 onClick={addExperience}
                 className="text-blue-600 hover:text-blue-700 font-semibold"
@@ -448,7 +500,7 @@ export default function CreatePortfolio() {
             </div>
 
             <div className="mt-8">
-              <label className="block text-sm font-semibold text-slate-900 mb-2">
+              <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2 justify-end">
                 Additional Experience
               </label>
               <textarea
@@ -461,13 +513,117 @@ export default function CreatePortfolio() {
                 placeholder="Add any other relevant experience or achievements..."
               />
             </div>
+            <div className="max-w-2xl mx-auto mb-8 mt-4">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+                Projects
+              </h2>
+
+              <div className="mb-6 flex justify-end">
+                <button
+                  onClick={addProject}
+                  className="text-blue-600 hover:text-blue-700 font-semibold"
+                >
+                  + Add Project
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {portfolio.projects.map((project, idx) => (
+                  <div
+                    key={idx}
+                    className="p-6 border border-slate-200 rounded-lg"
+                  >
+                    <div className="grid md:grid-cols-2 gap-4 mb-4">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            // Create a temporary preview URL
+                            const preview = URL.createObjectURL(file);
+                            updateProject(idx, "image", preview); // store preview for display
+                          }
+                        }}
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 mb-2"
+                      />
+
+                      {/* Preview */}
+                      {project.image && (
+                        <img
+                          src={project.image as string}
+                          alt={project.title}
+                          className="w-full max-h-64 object-cover rounded-lg shadow-md mb-4"
+                        />
+                      )}
+
+                      <input
+                        type="text"
+                        value={project.title}
+                        onChange={e =>
+                          updateProject(idx, "title", e.target.value)
+                        }
+                        placeholder="Project Title"
+                        className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+                      />
+
+                      <input
+                        type="text"
+                        value={project.role}
+                        onChange={e =>
+                          updateProject(idx, "role", e.target.value)
+                        }
+                        placeholder="Your Role (e.g. Frontend Developer)"
+                        className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+                      />
+                    </div>
+
+                    <input
+                      type="text"
+                      value={project.duration}
+                      onChange={e =>
+                        updateProject(idx, "duration", e.target.value)
+                      }
+                      placeholder="Duration (e.g. Mar 2023 – Jun 2023)"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 mb-4"
+                    />
+
+                    <textarea
+                      value={project.description}
+                      onChange={e =>
+                        updateProject(idx, "description", e.target.value)
+                      }
+                      placeholder="Project description, features, achievements"
+                      rows={3}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 mb-4"
+                    />
+
+                    <input
+                      type="url"
+                      value={project.link}
+                      onChange={e => updateProject(idx, "link", e.target.value)}
+                      placeholder="Project URL (GitHub / Live Demo)"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 mb-4"
+                    />
+
+                    <button
+                      onClick={() => removeProject(idx)}
+                      className="text-red-600 hover:text-red-700 font-semibold text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
         {/* Step 4: Template Selection */}
         {step === 4 && (
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-slate-900 mb-8">
+            <ScrollToTop />
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">
               Choose Your Template
             </h2>
 
@@ -478,11 +634,11 @@ export default function CreatePortfolio() {
                   onClick={() => updatePortfolio("templateId", template.id)}
                   className={`p-6 border-2 rounded-lg cursor-pointer transition ${
                     portfolio.templateId === template.id
-                      ? "border-blue-600 bg-blue-50"
-                      : "border-slate-200 hover:border-slate-300"
+                      ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
+                      : "border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600"
                   }`}
                 >
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
                     {template.name}
                   </h3>
                   <p className="text-slate-600 mb-4">{template.description}</p>
@@ -533,7 +689,7 @@ export default function CreatePortfolio() {
           <button
             onClick={handlePrevious}
             disabled={step === 1}
-            className="flex items-center gap-2 px-6 py-3 border border-slate-300 rounded-lg font-semibold text-slate-900 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="flex items-center gap-2 px-6 py-3 border border-slate-300 rounded-lg font-semibold text-slate-900 dark:text-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             <ChevronLeft className="w-5 h-5" />
             Previous

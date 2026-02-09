@@ -20,6 +20,14 @@ export interface Portfolio {
     description: string;
   }>;
   additionalExperience: string;
+  projects: Array<{
+    title: string;
+    role: string;
+    duration: string;
+    description: string;
+    link: string;
+    image?: File | string;
+  }>;
   templateId: string;
   colorScheme: string;
   createdAt: string;
@@ -97,6 +105,7 @@ export const storage = {
       qualifications: [],
       experience: [],
       additionalExperience: "",
+       projects: [],
       templateId: "professional",
       colorScheme: "blue",
       createdAt: new Date().toISOString(),

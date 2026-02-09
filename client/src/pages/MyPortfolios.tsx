@@ -4,6 +4,14 @@ import { storage } from "@/lib/storage";
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Edit2, Trash2, Eye, Plus, Copy, Check } from "lucide-react";
+// Import templates for reference
+import { TEMPLATES } from "@/components/PortfolioTemplates";
+import ScrollToTop from "@/components/ScrollToTop";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function MyPortfolios() {
   const [portfolios, setPortfolios] = useState(storage.getAllPortfolios());
@@ -240,11 +248,4 @@ export default function MyPortfolios() {
   );
 }
 
-// Import templates for reference
-import { TEMPLATES } from "@/components/PortfolioTemplates";
-import ScrollToTop from "@/components/ScrollToTop";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+

@@ -46,12 +46,14 @@ export default function Templates() {
                 className="border border-slate-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
               >
                 {/* Template Preview */}
-                <div className="h-64 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-800 flex items-center justify-center">
+                <div className="h-64 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-800 flex items-center justify-center object-center bg-cover bg-center" 
+                style={{backgroundImage: `url("/placeholder.png")`}}
+                >
                   <div className="text-center">
-                    <div className="text-4xl font-bold text-slate-400 mb-2 dark:text-white">
+                    <div className="text-3xl font-bold text-slate-900 mb-2 dark:text-white">
                       {template.name}
                     </div>
-                    <p className="text-slate-500 dark:text-slate-100">
+                    <p className="text-slate-800 dark:text-slate-100">
                       Template Preview
                     </p>
                   </div>
@@ -98,12 +100,14 @@ export default function Templates() {
                       </button>
                     </Link>
                   </div>
+                  
                 </div>
               </div>
             ))}
           </div>
         </div>
       </section>
+      
 
       {/* Template Features */}
       <section className="py-20 bg-slate-50 dark:bg-slate-800 ">

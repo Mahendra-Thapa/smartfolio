@@ -11,6 +11,8 @@ import Templates from "./pages/Templates";
 import CreatePortfolio from "./pages/CreatePortfolio";
 import MyPortfolios from "./pages/MyPortfolios";
 import ViewPortfolio from "./pages/ViewPortfolio";
+import { Component } from "lucide-react";
+import Dashboard from "./pages/admin/Dashboard";
 
 function Router() {
   return (
@@ -22,6 +24,8 @@ function Router() {
       <Route path={"/create-portfolio"} component={CreatePortfolio} />
       <Route path={"/my-portfolios"} component={MyPortfolios} />
       <Route path={"/view-portfolio/:id"} component={ViewPortfolio} />
+      {/* Admin Route */}
+      <Route path={"/admin/dashboard"} component={Dashboard} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

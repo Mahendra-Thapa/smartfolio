@@ -51,7 +51,8 @@ useEffect(() => {
         setPortfolio(p);
 
         // Make sure these properties exist in your storage
-        const t = TEMPLATES.find((tmpl) => tmpl.id === (p.template || p.templateId));
+        //  const t = TEMPLATES.find((tmpl) => tmpl.id === (p.template || p.templateId));
+        const t = TEMPLATES.find((tmpl) => tmpl.id === ( p.templateId));
         const cs = t?.colorSchemes.find((scheme) => scheme.id === (p.colorScheme || "blue"));
 
         setTemplate(t || TEMPLATES[0]); // Default to first template

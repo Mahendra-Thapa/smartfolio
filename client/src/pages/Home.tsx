@@ -194,7 +194,7 @@ export default function Home() {
                   "No coding or design skills required",
                 ].map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-6 h-6 text-blue-800 flex-shrink-0 mt-0.5" />
                     <span className="text-lg text-slate-700 dark:text-slate-300">
                       {feature}
                     </span>
