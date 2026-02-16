@@ -13,6 +13,8 @@ import MyPortfolios from "./pages/MyPortfolios";
 import ViewPortfolio from "./pages/ViewPortfolio";
 import { Component } from "lucide-react";
 import Dashboard from "./pages/admin/Dashboard";
+import Login from "./pages/Login";
+import CreateAccount from "./pages/createAccount";
 
 function Router() {
   return (
@@ -24,6 +26,8 @@ function Router() {
       <Route path={"/create-portfolio"} component={CreatePortfolio} />
       <Route path={"/my-portfolios"} component={MyPortfolios} />
       <Route path={"/view-portfolio/:id"} component={ViewPortfolio} />
+      <Route path={"/signin"} component={Login} />
+      <Route path={"/signup"} component={CreateAccount} />
       {/* Admin Route */}
       <Route path={"/admin/dashboard"} component={Dashboard} />
       <Route path={"/404"} component={NotFound} />

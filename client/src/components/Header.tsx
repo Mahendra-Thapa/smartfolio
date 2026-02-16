@@ -1,5 +1,14 @@
 import { Link } from "wouter";
-import { Sparkles, Menu, X, Moon, Sun } from "lucide-react";
+import {
+  Sparkles,
+  Menu,
+  X,
+  Moon,
+  Sun,
+  UserPlus,
+  LogIn,
+  PlusCircle,
+} from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { usePathname } from "wouter/use-browser-location";
@@ -38,33 +47,27 @@ export default function Header() {
                 src="/darkLogo.png"
                 alt="logo"
               />
-              {/* <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center group-hover:shadow-lg transition-shadow">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div> */}
-              {/* <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                SmartFolio
-              </span> */}
             </div>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map(link => (
-              <Link key={link.href} href={link.href}>
-                <a
-                  href={link.href}
-                  className={`relative group font-medium transition-colors  ${
-                    pathname === link.href
-                      ? "text-slate-900 dark:text-white"
-                      : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-                  }  `}
-                >
-                  {link.label}
-
-                  <span
-                    className={`absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300  ${pathname === link.href ? "w-full" : "w-0 group-hover:w-full"}   `}
-                  />
-                </a>
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`relative group font-medium transition-colors ${
+                  pathname === link.href
+                    ? "text-slate-900 dark:text-white"
+                    : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                {link.label}
+                <span
+                  className={`absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 ${
+                    pathname === link.href ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
+                />
               </Link>
             ))}
           </nav>
@@ -86,9 +89,43 @@ export default function Header() {
 
             {/* CTA Button */}
             <Link href="/create-portfolio">
-              <button className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#04296c] to-blue-600 hover:from-[#04296c] hover:to-blue-700 text-white rounded-lg font-semibold transition-all shadow-md hover:shadow-lg">
-                <Sparkles className="w-4 h-4" />
+              <button
+                type="button"
+                className="hidden md:flex items-center gap-2 px-6 py-2.5
+          bg-gradient-to-r from-[#04296c] to-blue-600
+          hover:to-blue-700 text-white rounded-lg font-semibold
+          transition-all shadow-md hover:shadow-lg"
+              >
+                <PlusCircle className="w-4 h-4" />
                 Create
+              </button>
+            </Link>
+
+            {/* Sign In */}
+            <Link href="/signin">
+              <button
+                type="button"
+                className="hidden md:flex items-center gap-2 px-6 py-2.5
+          bg-gradient-to-r from-[#04296c] to-blue-600
+          hover:to-blue-700 text-white rounded-lg font-semibold
+          transition-all shadow-md hover:shadow-lg"
+              >
+                <LogIn className="w-4 h-4" />
+                Sign In
+              </button>
+            </Link>
+
+            {/* Create Account */}
+            <Link href="/signup">
+              <button
+                type="button"
+                className="hidden md:flex items-center gap-2 px-6 py-2.5
+          bg-gradient-to-r from-[#04296c] to-blue-600
+          hover:to-blue-700 text-white rounded-lg font-semibold
+          transition-all shadow-md hover:shadow-lg"
+              >
+                <UserPlus className="w-4 h-4" />
+                Create Account
               </button>
             </Link>
 
@@ -110,18 +147,17 @@ export default function Header() {
         {isOpen && (
           <nav className="md:hidden pb-4 space-y-2 animate-in fade-in slide-in-from-top-2">
             {navLinks.map(link => (
-              <Link key={link.href} href={link.href}>
-                <a
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className={` block px-4 py-2 rounded-lg transition-colors ${
-                    pathname === link.href
-                      ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
-                      : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800"
-                  } `}
-                >
-                  {link.label}
-                </a>
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setIsOpen(false)}
+                className={`block px-4 py-2 rounded-lg transition-colors ${
+                  pathname === link.href
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                    : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800"
+                }`}
+              >
+                {link.label}
               </Link>
             ))}
             <Link href="/create-portfolio">
