@@ -8,15 +8,19 @@ import {
   UserPlus,
   LogIn,
   PlusCircle,
+  LogOut,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { usePathname } from "wouter/use-browser-location";
+import { clearCookies, getTokenFromCookies } from "@/utils/cookies";
+import toast from "react-hot-toast";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   let pathname = usePathname();
+  const token = getTokenFromCookies();
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -25,6 +29,38 @@ export default function Header() {
     { href: "/contact", label: "Contact" },
     { href: "/my-portfolios", label: "My Portfolios" },
   ];
+
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: any) {
+      if (menuRef.current && !(menuRef.current as any).contains(event.target)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    Promise.resolve()
+      .then(() => {
+        clearCookies(); // your function
+        toast.dismiss();
+        toast.success("Logout successful");
+
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 800); // small delay for UX
+      })
+      .catch(() => {
+        toast.dismiss();
+        toast.error("Logout failed. Please try again.");
+      });
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50 transition-colors duration-300">
@@ -87,36 +123,65 @@ export default function Header() {
               )}
             </button>
 
-            {/* CTA Button */}
-            <Link href="/create-portfolio">
-              <button
-                type="button"
-                className="hidden md:flex items-center gap-2 px-6 py-2.5
-          bg-gradient-to-r from-[#04296c] to-blue-600
-          hover:to-blue-700 text-white rounded-lg font-semibold
-          transition-all shadow-md hover:shadow-lg"
-              >
-                <PlusCircle className="w-4 h-4" />
-                Create
-              </button>
-            </Link>
+            {token ? (
+              <div className="flex gap-2 items-center justify-center">
+                <Link href="/create-portfolio">
+                  <button
+                    type="button"
+                    className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#04296c] to-blue-600 hover:to-blue-700 text-white rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    Create
+                  </button>
+                </Link>
+                <div className="relative" ref={menuRef}>
+                  {/* Profile Button */}
+                  <button
+                    onClick={() => setOpen(!open)}
+                    className="  w-10 h-10  rounded-full  overflow-hidden  border border-gray-200  hover:scale-105  transition-all duration-200"
+                  >
+                    <img
+                      src="https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2264922221.jpg"
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
 
-            {/* Sign In */}
-            <Link href="/signin">
-              <button
-                type="button"
-                className="hidden md:flex items-center gap-2 px-6 py-2.5
+                  {/* Dropdown */}
+                  {open && (
+                    <div className="  absolute right-0 mt-2  w-44 bg-white  rounded-xl  shadow-lg  border border-gray-100  py-2 z-50 ">
+                      {/* <button className="  w-full text-left  px-4 py-2  text-sm text-gray-700  hover:bg-gray-50 ">
+                        Profile
+                      </button> */}
+
+                      <button
+                        className="  w-full text-left  px-4 py-2  text-sm text-red-500  hover:bg-red-50  flex items-center gap-2 font-semibold"
+                        onClick={handleLogout}
+                      >
+                        <LogOut size={16} />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <Link href="/signin">
+                <button
+                  type="button"
+                  className="hidden md:flex items-center gap-2 px-6 py-2.5
           bg-gradient-to-r from-[#04296c] to-blue-600
           hover:to-blue-700 text-white rounded-lg font-semibold
-          transition-all shadow-md hover:shadow-lg"
-              >
-                <LogIn className="w-4 h-4" />
-                Sign In
-              </button>
-            </Link>
+          transition-all rounded shadow-md hover:shadow-lg"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </button>
+              </Link>
+            )}
 
             {/* Create Account */}
-            <Link href="/signup">
+            {/* <Link href="/signup">
               <button
                 type="button"
                 className="hidden md:flex items-center gap-2 px-6 py-2.5
@@ -127,7 +192,7 @@ export default function Header() {
                 <UserPlus className="w-4 h-4" />
                 Create Account
               </button>
-            </Link>
+            </Link> */}
 
             {/* Mobile Menu Button */}
             <button
@@ -160,14 +225,35 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
-            <Link href="/create-portfolio">
-              <button
-                className="w-full mt-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold transition-all"
-                onClick={() => setIsOpen(false)}
-              >
-                Create Portfolio
-              </button>
-            </Link>
+            <div>
+              {token ? (
+                <Link href="/create-portfolio">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-center gap-2 px-6 py-2.5
+          bg-gradient-to-r from-[#04296c] to-blue-600
+          hover:to-blue-700 text-white rounded-lg font-semibold
+          transition-all shadow-md hover:shadow-lg"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    Create Portfolio
+                  </button>
+                </Link>
+              ) : (
+                <Link href="/signin">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-center gap-2 px-6 py-2.5
+          bg-gradient-to-r from-[#04296c] to-blue-600
+          hover:to-blue-700 text-white rounded-lg font-semibold
+          transition-all shadow-md hover:shadow-lg"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Sign In
+                  </button>
+                </Link>
+              )}
+            </div>
           </nav>
         )}
       </div>

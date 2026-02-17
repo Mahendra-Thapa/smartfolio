@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 import { UserDetails } from "@/types/userDetails";
-import { decodeJWT } from "./decodejwt";
+import { decodeJwt } from "./decodejwt"; // ✅ FIXED NAME
 
 export interface UserTokenData {
   token: string;
@@ -17,23 +17,25 @@ export function setUserCookie(data: UserTokenData) {
   });
 }
 
-// Get cookie
+// Get raw token data
 export function getTokenFromCookies(): UserTokenData | null {
   const cookie = Cookies.get("smartfolio-DBMTJLFB");
   if (!cookie) return null;
+
   try {
-    return JSON.parse(cookie);
+    return JSON.parse(cookie) as UserTokenData;
   } catch {
     return null;
   }
 }
 
-// Get decoded JWT
+// Decode JWT safely
 export function getUserFromCookies(): UserDetails | null {
   const tokenData = getTokenFromCookies();
   if (!tokenData?.token) return null;
+
   try {
-    return decodeJWT(tokenData.token);
+    return decodeJwt(tokenData.token);
   } catch {
     return null;
   }

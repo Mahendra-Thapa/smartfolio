@@ -1,13 +1,6 @@
-import jwt from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
+import { UserDetails } from "@/types/userDetails";
 
-export interface DecodedToken {
-  email: string;
-  role: string;
-  exp?: number;
-  iat?: number;
-}
-
-export function decodeJWT(token: string): DecodedToken {
-  // Use the default property for CJS build
-  return (jwt as any)(token) as DecodedToken;
-}
+export const decodeJwt = (token: string): UserDetails => {
+  return jwtDecode<UserDetails>(token);
+};

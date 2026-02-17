@@ -1,9 +1,10 @@
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
-import ErrorBoundary from "./components/ErrorBoundary";
+import React from "react";
+import { Switch, Route } from "wouter";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "react-hot-toast";
+import ErrorBoundary from "./components/ErrorBoundary";
+
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -11,27 +12,93 @@ import Templates from "./pages/Templates";
 import CreatePortfolio from "./pages/CreatePortfolio";
 import MyPortfolios from "./pages/MyPortfolios";
 import ViewPortfolio from "./pages/ViewPortfolio";
-import { Component } from "lucide-react";
-import Dashboard from "./pages/admin/Dashboard";
 import Login from "./pages/Login";
 import CreateAccount from "./pages/createAccount";
+import Dashboard from "./pages/admin/Dashboard";
+import NotFound from "./pages/NotFound";
+import RoleProtectedRoute from "./utils/RoleProtectedRoute";
+import AdminLayout from "./components/admin/layouts/AdminLayout";
+import UserList from "./pages/admin/UserList";
 
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/about"} component={About} />
-      <Route path={"/contact"} component={Contact} />
-      <Route path={"/templates"} component={Templates} />
-      <Route path={"/create-portfolio"} component={CreatePortfolio} />
-      <Route path={"/my-portfolios"} component={MyPortfolios} />
-      <Route path={"/view-portfolio/:id"} component={ViewPortfolio} />
-      <Route path={"/signin"} component={Login} />
-      <Route path={"/signup"} component={CreateAccount} />
-      {/* Admin Route */}
-      <Route path={"/admin/dashboard"} component={Dashboard} />
-      <Route path={"/404"} component={NotFound} />
-      <Route component={NotFound} />
+      {/* Public Routes */}
+      <Route path="/">
+        <RoleProtectedRoute publicRoute>
+          <Home />
+        </RoleProtectedRoute>
+      </Route>
+      <Route path="/about">
+        <RoleProtectedRoute publicRoute>
+          <About />
+        </RoleProtectedRoute>
+      </Route>
+      <Route path="/contact">
+        <RoleProtectedRoute publicRoute>
+          <Contact />
+        </RoleProtectedRoute>
+      </Route>
+      <Route path="/templates">
+        <RoleProtectedRoute publicRoute>
+          <Templates />
+        </RoleProtectedRoute>
+      </Route>
+      <Route path="/signin">
+        <RoleProtectedRoute publicRoute>
+          <Login />
+        </RoleProtectedRoute>
+      </Route>
+      <Route path="/signup">
+        <RoleProtectedRoute publicRoute>
+          <CreateAccount />
+        </RoleProtectedRoute>
+      </Route>
+
+      {/* User Routes */}
+      <Route path="/create-portfolio">
+        <RoleProtectedRoute>
+          <CreatePortfolio />
+        </RoleProtectedRoute>
+      </Route>
+      <Route path="/my-portfolios">
+        <RoleProtectedRoute>
+          <MyPortfolios />
+        </RoleProtectedRoute>
+      </Route>
+      <Route path="/view-portfolio/:id">
+        <RoleProtectedRoute>
+          <ViewPortfolio />
+        </RoleProtectedRoute>
+      </Route>
+
+      {/* Admin Routes */}
+      <Route path="/admin/dashboard">
+        <RoleProtectedRoute>
+          <AdminLayout>
+            <Dashboard />
+          </AdminLayout>
+        </RoleProtectedRoute>
+      </Route>
+      <Route path="/admin/users">
+        <RoleProtectedRoute>
+          <AdminLayout>
+            <UserList />
+          </AdminLayout>
+        </RoleProtectedRoute>
+      </Route>
+
+      {/* Fallback */}
+      <Route path="/404">
+        <RoleProtectedRoute publicRoute>
+          <NotFound />
+        </RoleProtectedRoute>
+      </Route>
+      <Route>
+        <RoleProtectedRoute publicRoute>
+          <NotFound />
+        </RoleProtectedRoute>
+      </Route>
     </Switch>
   );
 }
@@ -39,11 +106,9 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
-          <Toaster />
+          <Toaster position="top-center" />
           <Router />
         </TooltipProvider>
       </ThemeProvider>

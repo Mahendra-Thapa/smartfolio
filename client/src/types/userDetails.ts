@@ -4,4 +4,5 @@ export interface UserDetails {
   id: string;
   sub: string;
   userType: string;
+  roles: string[];
 }
