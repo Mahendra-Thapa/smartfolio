@@ -58,7 +58,7 @@ export default function Contact() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-20 dark:bg-accent ">
+      <section className="py-20 dark:bg-slate-900 ">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
             {/* Contact Information */}

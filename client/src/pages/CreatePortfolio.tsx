@@ -1,31 +1,86 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { storage, Portfolio } from "@/lib/storage";
 import { TEMPLATES } from "@/components/PortfolioTemplates";
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import ScrollToTop from "@/components/ScrollToTop";
+import { axiosAuthInstance } from "@/utils/axiosInstance";
+import { getTokenFromCookies } from "@/utils/cookies";
+import toast from "react-hot-toast";
 
 export default function CreatePortfolio() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
-  const [portfolio, setPortfolio] = useState<Portfolio>(
-    storage.createNewPortfolio()
-  );
+  const [portfolio, setPortfolio] = useState<any>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  // const [ownerEmail, setOwnerEmail] = useState("");
+
+  const ownerEmailCookie = getTokenFromCookies();
+  const ownerEmail = ownerEmailCookie?.email ?? "";
+
+  const params = new URLSearchParams(window.location.search);
+  const editId = params.get("edit");
 
   useEffect(() => {
-    // Load from localStorage if editing
     const params = new URLSearchParams(window.location.search);
     const editId = params.get("edit");
+
     if (editId) {
-      const existing = storage.getPortfolio(editId);
-      if (existing) {
-        setPortfolio(existing);
-      }
+      setLoading(true);
+      axiosAuthInstance
+        .get(`/api/portfolios/${editId}`)
+        .then(res => {
+          const data = res.data;
+
+          // Initialize preview for personal image if it exists
+          if (data.personalImage) {
+            data.personalImagePreview = data.personalImage; // URL from API
+          }
+
+          // Initialize previews for project images
+          if (data.projects && data.projects.length) {
+            data.projects = data.projects.map((p: any) => ({
+              ...p,
+              image: p.image || null, // API image URL
+            }));
+          }
+
+          setPortfolio(data);
+        })
+        .catch(err => {
+          console.error("Failed to load portfolio", err);
+          alert("Failed to load portfolio. Redirecting...");
+          setLocation("/my-portfolios");
+        })
+        .finally(() => setLoading(false));
+    } else {
+      // Default empty portfolio for create
+      setPortfolio({
+        name: "",
+        title: "",
+        intro: "",
+        email: "",
+        phone: "",
+        ownerEmail: "",
+        education: [],
+        skills: [],
+        experience: [],
+        projects: [],
+        qualifications: [],
+        additionalExperience: "",
+        templateId: null,
+        colorScheme: null,
+        personalImage: null,
+        personalImagePreview: null,
+      });
+      setLoading(false);
     }
-  }, []);
+  }, [setLocation]);
+
+  if (loading || !portfolio) return <div className="p-12">Loading...</div>;
 
   const validateStep = (stepNum: number) => {
     const newErrors: Record<string, string> = {};
@@ -43,128 +98,241 @@ export default function CreatePortfolio() {
   };
 
   const handleNext = () => {
-    if (validateStep(step)) {
-      setStep(step + 1);
-    }
+    if (validateStep(step)) setStep(step + 1);
   };
 
-  const handlePrevious = () => {
-    setStep(step - 1);
-  };
+  const handlePrevious = () => setStep(step - 1);
 
   const handleSave = () => {
-    storage.savePortfolio(portfolio);
-    setLocation("/my-portfolios");
+    if (!validateStep(step)) return;
+
+    setSaving(true);
+
+    const formData = new FormData();
+
+    //  Basic Portfolio Info
+    formData.append("name", portfolio.name || "");
+    formData.append("title", portfolio.title || "");
+    formData.append("intro", portfolio.intro || "");
+    formData.append("email", portfolio.email || "");
+    formData.append("phone", portfolio.phone || "");
+    formData.append(
+      "additionalExperience",
+      portfolio.additionalExperience || ""
+    );
+    formData.append("ownerEmail", ownerEmail);
+
+    //  Skills
+    portfolio.skills.forEach((skill: string) => {
+      if (skill.trim()) formData.append("skills", skill);
+    });
+
+    //  Qualifications
+    portfolio.qualifications?.forEach((q: string) => {
+      if (q.trim()) formData.append("qualifications", q);
+    });
+
+    //  Education
+    portfolio.education?.forEach((edu: any) => {
+      formData.append("educationInstitutions", edu.institution || "");
+      formData.append("educationDegrees", edu.degree || "");
+      formData.append("educationFields", edu.educationField || "");
+      formData.append("educationYears", edu.year || "");
+      formData.append("educationDetails", edu.details || "");
+    });
+
+    //  Experience
+    portfolio.experience?.forEach((exp: any) => {
+      formData.append("experienceCompanies", exp.company || "");
+      formData.append("experiencePositions", exp.position || "");
+      formData.append("experienceDurations", exp.duration || "");
+      formData.append("experienceDescriptions", exp.description || "");
+    });
+
+    // Additional Experience
+    if (portfolio.additionalExperience) {
+      formData.append("additionalExperience", portfolio.additionalExperience);
+    }
+
+    // Projects
+    portfolio.projects?.forEach((project: any) => {
+      formData.append("projectNames", project.name || "");
+      formData.append("projectDescriptions", project.description || "");
+      formData.append(
+        "projectTechnologies",
+        (project.technologiesList || []).join(",")
+      );
+      formData.append("projectDuration", project.projectDuration || "");
+      formData.append("projectRole", project.projectRole || "");
+      formData.append("projectLinks", project.link || "");
+
+      // Append the actual File object for upload
+      if (project.image instanceof File) {
+        formData.append("projectImages", project.image);
+      }
+    });
+
+    // ---------- Personal Image ----------
+    if (portfolio.personalImage instanceof File) {
+      formData.append("personalImage", portfolio.personalImage);
+    }
+
+    // **Add Template ID & Color Scheme**
+    if (portfolio.templateId) {
+      formData.append("templateId", portfolio.templateId.toString());
+    }
+    // Append colorScheme
+    if (portfolio.colorScheme !== null && portfolio.colorScheme !== undefined) {
+      formData.append("colorSchema", portfolio.colorScheme.toString());
+    } else {
+      toast.error("ColorScheme not selected!"); // Optional debug
+    }
+
+    // Decide POST or PUT
+    const request = editId
+      ? axiosAuthInstance.put(`/api/portfolios/${editId}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+      : axiosAuthInstance.post("/api/portfolios", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+    request
+      .then(() => {
+        setLocation("/my-portfolios");
+      })
+      .catch(err => {
+        console.error("Save failed", err);
+      })
+      .finally(() => {
+        setSaving(false);
+      });
   };
+
+  // const updatePortfolio = (field: string, value: any) => {
+  //   setPortfolio((prev: any) => ({ ...prev, [field]: value }));
+  // };
 
   const updatePortfolio = (field: string, value: any) => {
-    setPortfolio(prev => ({ ...prev, [field]: value }));
+    setPortfolio((prev: any) => ({ ...prev, [field]: value }));
   };
 
-  const addEducation = () => {
-    setPortfolio(prev => ({
-      ...prev,
-      education: [
-        ...prev.education,
-        { institution: "", degree: "", field: "", year: "" },
-      ],
-    }));
-  };
-
-  const updateEducation = (idx: number, field: string, value: string) => {
-    setPortfolio(prev => ({
-      ...prev,
-      education: prev.education.map((edu, i) =>
-        i === idx ? { ...edu, [field]: value } : edu
-      ),
-    }));
-  };
-
-  const removeEducation = (idx: number) => {
-    setPortfolio(prev => ({
-      ...prev,
-      education: prev.education.filter((_, i) => i !== idx),
-    }));
-  };
-
-  const addExperience = () => {
-    setPortfolio(prev => ({
-      ...prev,
-      experience: [
-        ...prev.experience,
-        { company: "", position: "", duration: "", description: "" },
-      ],
-    }));
-  };
-
-  const updateExperience = (idx: number, field: string, value: string) => {
-    setPortfolio(prev => ({
-      ...prev,
-      experience: prev.experience.map((exp, i) =>
-        i === idx ? { ...exp, [field]: value } : exp
-      ),
-    }));
-  };
-
-  const removeExperience = (idx: number) => {
-    setPortfolio(prev => ({
-      ...prev,
-      experience: prev.experience.filter((_, i) => i !== idx),
-    }));
-  };
-
-  const addSkill = () => {
-    setPortfolio(prev => ({
-      ...prev,
-      skills: [...prev.skills, ""],
-    }));
-  };
-
+  const addSkill = () => updatePortfolio("skills", [...portfolio.skills, ""]);
   const updateSkill = (idx: number, value: string) => {
-    setPortfolio(prev => ({
-      ...prev,
-      skills: prev.skills.map((skill, i) => (i === idx ? value : skill)),
-    }));
+    updatePortfolio(
+      "skills",
+      portfolio.skills.map((s: string, i: number) => (i === idx ? value : s))
+    );
   };
-
   const removeSkill = (idx: number) => {
-    setPortfolio(prev => ({
-      ...prev,
-      skills: prev.skills.filter((_, i) => i !== idx),
-    }));
+    updatePortfolio(
+      "skills",
+      portfolio.skills.filter((_: any, i: number) => i !== idx)
+    );
   };
 
   const addProject = () => {
-    setPortfolio(prev => ({
-      ...prev,
-      projects: [
-        ...prev.projects,
-        {
-          title: "",
-          role: "",
-          duration: "",
-          description: "",
-          link: "",
-          image: "",
-        },
-      ],
-    }));
+    updatePortfolio("projects", [
+      ...portfolio.projects,
+      {
+        name: "",
+        role: "",
+        duration: "",
+        description: "",
+        link: "",
+        technologies: "",
+        image: null,
+      },
+    ]);
   };
 
-  const updateProject = (idx: number, field: string, value: string) => {
-    setPortfolio(prev => ({
-      ...prev,
-      projects: prev.projects.map((project, i) =>
-        i === idx ? { ...project, [field]: value } : project
-      ),
-    }));
+  const updateProjectImage = (index: number, file: File) => {
+    setPortfolio((prev: any) => {
+      const projects = [...prev.projects];
+      projects[index] = {
+        ...projects[index],
+        image: file, // actual file for backend
+        imagePreview: URL.createObjectURL(file), // for UI only
+      };
+      return { ...prev, projects };
+    });
+  };
+
+  const updateProject = (idx: number, field: string, value: any) => {
+    updatePortfolio(
+      "projects",
+      portfolio.projects.map((p: any, i: number) =>
+        i === idx ? { ...p, [field]: value } : p
+      )
+    );
   };
 
   const removeProject = (idx: number) => {
-    setPortfolio(prev => ({
-      ...prev,
-      projects: prev.projects.filter((_, i) => i !== idx),
-    }));
+    updatePortfolio(
+      "projects",
+      portfolio.projects.filter((_: any, i: number) => i !== idx)
+    );
+  };
+
+  const addExperience = () => {
+    updatePortfolio("experience", [
+      ...portfolio.experience,
+      {
+        company: "",
+        role: "",
+        duration: "",
+        description: "",
+      },
+    ]);
+  };
+
+  const updateExperience = (idx: number, field: string, value: string) => {
+    updatePortfolio(
+      "experience",
+      portfolio.experience.map((exp: any, i: number) =>
+        i === idx ? { ...exp, [field]: value } : exp
+      )
+    );
+  };
+
+  const removeExperience = (idx: number) => {
+    updatePortfolio(
+      "experience",
+      portfolio.experience.filter((_: any, i: number) => i !== idx)
+    );
+  };
+
+  const addEducation = () => {
+    updatePortfolio("education", [
+      ...portfolio.education,
+      {
+        institution: "",
+        degree: "",
+        educationFields: "",
+        year: "",
+        details: "",
+      },
+    ]);
+  };
+
+  const updateEducation = (idx: number, field: string, value: string) => {
+    updatePortfolio(
+      "education",
+      portfolio.education.map((edu: any, i: number) =>
+        i === idx ? { ...edu, [field]: value } : edu
+      )
+    );
+  };
+
+  const removeEducation = (idx: number) => {
+    updatePortfolio(
+      "education",
+      portfolio.education.filter((_: any, i: number) => i !== idx)
+    );
   };
 
   return (
@@ -202,7 +370,7 @@ export default function CreatePortfolio() {
           <div className="flex justify-between text-sm text-slate-600">
             <span>Personal Info</span>
             <span>Education & Skills</span>
-            <span>Experience</span>
+            <span>Experience & project</span>
             <span>Template</span>
           </div>
         </div>
@@ -215,6 +383,37 @@ export default function CreatePortfolio() {
             </h2>
             <ScrollToTop />
             <div className="space-y-6">
+              {/* Personal Image */}
+              <div className="mt-6">
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Personal Image
+                </label>{" "}
+                {/* Optional preview */}
+                {portfolio.personalImagePreview && (
+                  <img
+                    src={portfolio.personalImagePreview}
+                    alt="Personal"
+                    className="w-32 h-32 object-cover rounded-full mb-2 shadow-md"
+                  />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    // Store actual File
+                    updatePortfolio("personalImage", file);
+                    // Store preview separately
+                    updatePortfolio(
+                      "personalImagePreview",
+                      URL.createObjectURL(file)
+                    );
+                  }}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
                   Full Name *
@@ -226,7 +425,7 @@ export default function CreatePortfolio() {
                   className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${
                     errors.name ? "border-red-500" : "border-slate-300"
                   }`}
-                  placeholder="John Doe"
+                  placeholder="Mahendra Thapa"
                 />
                 {errors.name && (
                   <p className="text-red-600 text-sm mt-1">{errors.name}</p>
@@ -281,11 +480,30 @@ export default function CreatePortfolio() {
                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${
                       errors.email ? "border-red-500" : "border-slate-300"
                     }`}
-                    placeholder="john@example.com"
+                    placeholder="thapa@gmail.com"
                   />
                   {errors.email && (
                     <p className="text-red-600 text-sm mt-1">{errors.email}</p>
                   )}
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Owner Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={ownerEmail}
+                    onChange={e => updatePortfolio("ownerEmail", ownerEmail)}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${
+                      errors.ownerEmail ? "border-red-500" : "border-slate-300"
+                    }`}
+                    placeholder="thapa@gmail.com"
+                  />
+                  {/* {errors.ownerEmail && (
+                    <p className="text-red-600 text-sm mt-1">
+                      {errors.ownerEmail}
+                    </p>
+                  )} */}
                 </div>
 
                 <div>
@@ -321,7 +539,7 @@ export default function CreatePortfolio() {
             {/* Education */}
             <div className="mb-12">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-slate-900">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
                   Education
                 </h3>
                 <button
@@ -333,7 +551,7 @@ export default function CreatePortfolio() {
               </div>
 
               <div className="space-y-6">
-                {portfolio.education.map((edu, idx) => (
+                {portfolio.education.map((edu: any, idx: number) => (
                   <div
                     key={idx}
                     className="p-6 border border-slate-200 rounded-lg"
@@ -361,9 +579,9 @@ export default function CreatePortfolio() {
                     <div className="grid md:grid-cols-2 gap-4 mb-4">
                       <input
                         type="text"
-                        value={edu.field}
+                        value={edu.educationField}
                         onChange={e =>
-                          updateEducation(idx, "field", e.target.value)
+                          updateEducation(idx, "educationField", e.target.value)
                         }
                         placeholder="Field of Study"
                         className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -375,6 +593,15 @@ export default function CreatePortfolio() {
                           updateEducation(idx, "year", e.target.value)
                         }
                         placeholder="Year of Graduation"
+                        className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      />
+                      <input
+                        type="text"
+                        value={edu.details}
+                        onChange={e =>
+                          updateEducation(idx, "details", e.target.value)
+                        }
+                        placeholder="Education Details"
                         className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                       />
                     </div>
@@ -392,7 +619,9 @@ export default function CreatePortfolio() {
             {/* Skills */}
             <div className="mb-12">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-slate-900">Skills</h3>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
+                  Skills
+                </h3>
                 <button
                   onClick={addSkill}
                   className="text-blue-600 hover:text-blue-700 font-semibold"
@@ -402,7 +631,7 @@ export default function CreatePortfolio() {
               </div>
 
               <div className="space-y-4">
-                {portfolio.skills.map((skill, idx) => (
+                {portfolio.skills.map((skill: any, idx: any) => (
                   <div
                     key={idx}
                     className="flex items-center gap-4 p-4 border border-slate-200 rounded-lg"
@@ -425,10 +654,67 @@ export default function CreatePortfolio() {
                 ))}
               </div>
             </div>
+            {/* Qualifications */}
+            <div className="mb-12">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
+                  Qualifications
+                </h3>
+                <button
+                  onClick={() =>
+                    setPortfolio((prev: any) => ({
+                      ...prev,
+                      qualifications: [...prev.qualifications, ""],
+                    }))
+                  }
+                  className="text-blue-600 hover:text-blue-700 font-semibold"
+                >
+                  + Add Qualification
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {portfolio.qualifications.map((qual: string, idx: number) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-4 p-4 border border-slate-200 rounded-lg"
+                  >
+                    <input
+                      type="text"
+                      value={qual}
+                      onChange={e => {
+                        const updated = [...portfolio.qualifications];
+                        updated[idx] = e.target.value;
+                        setPortfolio((prev: any) => ({
+                          ...prev,
+                          qualifications: updated,
+                        }));
+                      }}
+                      placeholder="Qualification (e.g., B.Sc. Computer Science)"
+                      className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    />
+                    <button
+                      onClick={() => {
+                        const updated = portfolio.qualifications.filter(
+                          (_: any, i: number) => i !== idx
+                        );
+                        setPortfolio((prev: any) => ({
+                          ...prev,
+                          qualifications: updated,
+                        }));
+                      }}
+                      className="text-red-600 hover:text-red-700 font-semibold text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Step 3: Experience */}
+        {/* Step 3: Experience and Projects */}
         {step === 3 && (
           <div className="max-w-2xl mx-auto">
             <ScrollToTop />
@@ -446,7 +732,7 @@ export default function CreatePortfolio() {
             </div>
 
             <div className="space-y-6">
-              {portfolio.experience.map((exp, idx) => (
+              {portfolio.experience.map((exp: any, idx: any) => (
                 <div
                   key={idx}
                   className="p-6 border border-slate-200 rounded-lg"
@@ -528,7 +814,7 @@ export default function CreatePortfolio() {
               </div>
 
               <div className="space-y-6">
-                {portfolio.projects.map((project, idx) => (
+                {portfolio.projects.map((project: any, idx: any) => (
                   <div
                     key={idx}
                     className="p-6 border border-slate-200 rounded-lg"
@@ -539,29 +825,28 @@ export default function CreatePortfolio() {
                         accept="image/*"
                         onChange={e => {
                           const file = e.target.files?.[0];
-                          if (file) {
-                            // Create a temporary preview URL
-                            const preview = URL.createObjectURL(file);
-                            updateProject(idx, "image", preview); // store preview for display
-                          }
+                          if (file) updateProjectImage(idx, file);
                         }}
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 mb-2"
                       />
 
                       {/* Preview */}
                       {project.image && (
                         <img
-                          src={project.image as string}
-                          alt={project.title}
-                          className="w-full max-h-64 object-cover rounded-lg shadow-md mb-4"
+                          src={
+                            typeof project.image === "string"
+                              ? project.image // Backend URL
+                              : URL.createObjectURL(project.image) // Newly selected file
+                          }
+                          alt="Project Preview"
+                          className="w-full h-40 object-cover rounded-lg border"
                         />
                       )}
 
                       <input
                         type="text"
-                        value={project.title}
+                        value={project.name}
                         onChange={e =>
-                          updateProject(idx, "title", e.target.value)
+                          updateProject(idx, "name", e.target.value)
                         }
                         placeholder="Project Title"
                         className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600"
@@ -569,9 +854,9 @@ export default function CreatePortfolio() {
 
                       <input
                         type="text"
-                        value={project.role}
+                        value={project.projectRole}
                         onChange={e =>
-                          updateProject(idx, "role", e.target.value)
+                          updateProject(idx, "projectRole", e.target.value)
                         }
                         placeholder="Your Role (e.g. Frontend Developer)"
                         className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600"
@@ -580,9 +865,23 @@ export default function CreatePortfolio() {
 
                     <input
                       type="text"
-                      value={project.duration}
+                      value={project.technologiesList?.join(",") || ""}
                       onChange={e =>
-                        updateProject(idx, "duration", e.target.value)
+                        updateProject(
+                          idx,
+                          "technologiesList",
+                          e.target.value.split(",")
+                        )
+                      }
+                      placeholder="e.g., React, Node.js, Tailwind"
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+                    />
+
+                    <input
+                      type="text"
+                      value={project.projectDuration}
+                      onChange={e =>
+                        updateProject(idx, "projectDuration", e.target.value)
                       }
                       placeholder="Duration (e.g. Mar 2023 – Jun 2023)"
                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 mb-4"

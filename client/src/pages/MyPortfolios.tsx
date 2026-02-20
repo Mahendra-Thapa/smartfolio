@@ -1,54 +1,101 @@
+"use client";
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { storage } from "@/lib/storage";
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Edit2, Trash2, Eye, Plus, Copy, Check } from "lucide-react";
-// Import templates for reference
 import { TEMPLATES } from "@/components/PortfolioTemplates";
 import ScrollToTop from "@/components/ScrollToTop";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { axiosAuthInstance } from "@/utils/axiosInstance";
+import toast from "react-hot-toast";
 
 export default function MyPortfolios() {
-  const [portfolios, setPortfolios] = useState(storage.getAllPortfolios());
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [duplicateSuccess, setDuplicateSuccess] = useState<string | null>(null);
+  const [portfolios, setPortfolios] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [duplicateSuccess, setDuplicateSuccess] = useState<number | null>(null);
 
-  const handleDelete = (id: string) => {
-    storage.deletePortfolio(id);
-    setPortfolios(storage.getAllPortfolios());
-    setDeleteConfirm(null);
+  //  Fetch Portfolios From API
+  const fetchPortfolios = () => {
+    setLoading(true);
+
+    axiosAuthInstance
+      .get("/api/portfolios")
+      .then(res => {
+        // Normalize API Data (VERY IMPORTANT)
+        const normalized = res.data.map((p: any) => ({
+          ...p,
+
+          // Fallbacks so UI NEVER breaks
+          templateId: p.templateId || TEMPLATES[0]?.id,
+          colorScheme: p.colorScheme || TEMPLATES[0]?.colorSchemes?.[0]?.id,
+
+          createdAt: p.createdAt || new Date().toISOString(),
+        }));
+
+        setPortfolios(normalized);
+      })
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
   };
 
-  const handleDuplicate = (id: string) => {
-    const duplicated = storage.duplicatePortfolio(id);
-    if (duplicated) {
-      setPortfolios(storage.getAllPortfolios());
-      setDuplicateSuccess(duplicated.id);
-      setTimeout(() => setDuplicateSuccess(null), 3000);
-    }
+  useEffect(() => {
+    fetchPortfolios();
+  }, []);
+
+  //  Delete Portfolio (API)
+  const handleDelete = (id: number) => {
+    axiosAuthInstance
+      .delete(`/api/portfolios/${id}`)
+      .then(() => {
+        fetchPortfolios();
+        setDeleteConfirm(null);
+      })
+      .catch(err => console.error(err));
+  };
+
+  //  Duplicate Portfolio (API)
+  const handleDuplicate = (id: number) => {
+    axiosAuthInstance
+      .post(`/api/portfolios/${id}/duplicate`)
+      .then(() => {
+        fetchPortfolios();
+        setDuplicateSuccess(id);
+
+        setTimeout(() => setDuplicateSuccess(null), 3000);
+        toast.dismiss();
+        toast.success("Portfolio duplicated successfully!");
+      })
+      .catch(err => {
+        console.error(err);
+        toast.dismiss();
+        toast.error("Failed to duplicate portfolio.");
+      });
   };
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 flex flex-col">
       <Header />
       <ScrollToTop />
+
       {/* Page Header */}
       <section
         className="relative bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-700 py-28"
         style={{
           backgroundImage:
-            "url('https://hexagon.com/-/media/project/one-web/master-site/ali/images/hexagon-project-portfolio-management-marquee5-2560x880.jpg?h=880&iar=0&w=2560&hash=7F84FA1C056179AF371975A3B0396663')", // Replace with your image
+            "url('https://hexagon.com/-/media/project/one-web/master-site/ali/images/hexagon-project-portfolio-management-marquee5-2560x880.jpg?h=880&iar=0&w=2560&hash=7F84FA1C056179AF371975A3B0396663')",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           backgroundSize: "cover",
         }}
       >
-        {/* Overlay for readability */}
         <div className="absolute inset-0 bg-black/10 dark:bg-black/40"></div>
 
         <div className="relative container mx-auto px-4">
@@ -75,7 +122,13 @@ export default function MyPortfolios() {
       {/* Portfolios List */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          {portfolios.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <p className="text-slate-600 dark:text-slate-300">
+                Loading portfolios...
+              </p>
+            </div>
+          ) : portfolios.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">📋</div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
@@ -150,7 +203,6 @@ export default function MyPortfolios() {
 
                     {/* Action Buttons */}
                     <div className="flex gap-2 flex-wrap">
-                      {/* View */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Link href={`/view-portfolio/${portfolio.id}`}>
@@ -159,11 +211,9 @@ export default function MyPortfolios() {
                             </button>
                           </Link>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <span className="hidden sm:inline">View</span>
-                        </TooltipContent>
+                        <TooltipContent>View</TooltipContent>
                       </Tooltip>
-                      {/* edit */}
+
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Link href={`/create-portfolio?edit=${portfolio.id}`}>
@@ -172,33 +222,26 @@ export default function MyPortfolios() {
                             </button>
                           </Link>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <span className="hidden sm:inline">Edit</span>
-                        </TooltipContent>
+                        <TooltipContent>Edit</TooltipContent>
                       </Tooltip>
-                      {/* duplicate */}
+
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button
                             onClick={() => handleDuplicate(portfolio.id)}
                             className="border border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2"
-                            title="Duplicate portfolio"
                           >
                             <Copy className="w-4 h-4" />
                           </button>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          {" "}
-                          <span className="hidden sm:inline">Duplicate</span>
-                        </TooltipContent>
+                        <TooltipContent>Duplicate</TooltipContent>
                       </Tooltip>
-                      {/* Delete */}
+
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button
                             onClick={() => setDeleteConfirm(portfolio.id)}
                             className="border border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 px-4 py-2 rounded-lg font-semibold transition"
-                            title="Delete portfolio"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -214,27 +257,26 @@ export default function MyPortfolios() {
         </div>
       </section>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-lg p-8 max-w-sm mx-4">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-8 max-w-sm w-[400px] mx-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
               Delete Portfolio?
             </h2>
             <p className="text-slate-600 dark:text-slate-300 mb-8">
-              This action cannot be undone. Are you sure you want to delete this
-              portfolio?
+              This action cannot be undone.
             </p>
             <div className="flex gap-4">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 px-4 py-2 rounded-lg font-semibold transition"
+                className="flex-1 border px-4 py-2 rounded-lg"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+                className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg"
               >
                 Delete
               </button>
@@ -247,5 +289,3 @@ export default function MyPortfolios() {
     </div>
   );
 }
-
-
