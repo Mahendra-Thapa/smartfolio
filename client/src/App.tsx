@@ -19,6 +19,7 @@ import NotFound from "./pages/NotFound";
 import RoleProtectedRoute from "./utils/RoleProtectedRoute";
 import AdminLayout from "./components/admin/layouts/AdminLayout";
 import UserList from "./pages/admin/UserList";
+import Test from "./pages/Test";
 
 function Router() {
   return (
@@ -27,6 +28,11 @@ function Router() {
       <Route path="/">
         <RoleProtectedRoute publicRoute>
           <Home />
+        </RoleProtectedRoute>
+      </Route>
+      <Route path="/test">
+        <RoleProtectedRoute publicRoute>
+          <Test />
         </RoleProtectedRoute>
       </Route>
       <Route path="/about">

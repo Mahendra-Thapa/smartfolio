@@ -1,13 +1,14 @@
 "use client";
 
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useState, useEffect } from "react";
-import { Link } from "wouter";
-import { Edit2, Trash2, Eye, Plus, Copy, Check } from "lucide-react";
+import Header from "@/components/Header";
 import { TEMPLATES } from "@/components/PortfolioTemplates";
 import ScrollToTop from "@/components/ScrollToTop";
+import { Check, Copy, Edit2, Eye, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "wouter";
 
+import PortfolioCardSkeleton from "@/components/skeleton/PortfolioCardSkeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -57,8 +58,14 @@ export default function MyPortfolios() {
       .then(() => {
         fetchPortfolios();
         setDeleteConfirm(null);
+        toast.dismiss();
+        toast.success("Portfolio deleted successfully!");
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error(err);
+        toast.dismiss();
+        toast.error("Failed to delete portfolio!");
+      });
   };
 
   //  Duplicate Portfolio (API)
@@ -123,10 +130,10 @@ export default function MyPortfolios() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           {loading ? (
-            <div className="text-center py-16">
-              <p className="text-slate-600 dark:text-slate-300">
-                Loading portfolios...
-              </p>
+            <div className="grid grid-cols-3 md:gap-8 gap-5">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <PortfolioCardSkeleton key={i} />
+              ))}
             </div>
           ) : portfolios.length === 0 ? (
             <div className="text-center py-16">

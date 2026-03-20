@@ -3,11 +3,17 @@ import Footer from "@/components/Footer";
 import { TEMPLATES } from "@/components/PortfolioTemplates";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight, ChevronLeft, Save } from "lucide-react";
 import ScrollToTop from "@/components/ScrollToTop";
 import { axiosAuthInstance } from "@/utils/axiosInstance";
 import { getTokenFromCookies } from "@/utils/cookies";
 import toast from "react-hot-toast";
+
+import { useGrammar } from "@/hooks/useGrammar";
+import { useAutocomplete } from "@/hooks/useAutocomplete";
+import { useRewrite } from "@/hooks/useRewrite";
+import { useBanner } from "@/hooks/useBanner";
+import PortfolioField from "@/components/ai/portfolioFiled";
 
 export default function CreatePortfolio() {
   const [, setLocation] = useLocation();
@@ -23,6 +29,29 @@ export default function CreatePortfolio() {
 
   const params = new URLSearchParams(window.location.search);
   const editId = params.get("edit");
+
+  //  for the Ai
+  const { banner, showBanner } = useBanner();
+
+  const { fixGrammar, loading: loadGrammar } = useGrammar(val =>
+    updatePortfolio("intro", val)
+  );
+
+  const {
+    getSuggestions,
+    completions,
+    setCompletions,
+    loading: loadComplete,
+  } = useAutocomplete();
+
+  const {
+    rewriteText,
+    rewrite,
+    setRewrite,
+    loading: loadRewrite,
+  } = useRewrite();
+
+  // -------------------
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -103,7 +132,7 @@ export default function CreatePortfolio() {
 
   const handlePrevious = () => setStep(step - 1);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateStep(step)) return;
 
     setSaving(true);
@@ -116,10 +145,6 @@ export default function CreatePortfolio() {
     formData.append("intro", portfolio.intro || "");
     formData.append("email", portfolio.email || "");
     formData.append("phone", portfolio.phone || "");
-    formData.append(
-      "additionalExperience",
-      portfolio.additionalExperience || ""
-    );
     formData.append("ownerEmail", ownerEmail);
 
     //  Skills
@@ -155,22 +180,36 @@ export default function CreatePortfolio() {
     }
 
     // Projects
-    portfolio.projects?.forEach((project: any) => {
-      formData.append("projectNames", project.name || "");
-      formData.append("projectDescriptions", project.description || "");
-      formData.append(
-        "projectTechnologies",
-        (project.technologiesList || []).join(",")
-      );
-      formData.append("projectDuration", project.projectDuration || "");
-      formData.append("projectRole", project.projectRole || "");
-      formData.append("projectLinks", project.link || "");
+    if (portfolio.projects?.length) {
+      for (const project of portfolio.projects) {
+        formData.append("projectNames", project.name || "");
+        formData.append("projectDescriptions", project.description || "");
+        formData.append(
+          "projectTechnologies",
+          (project.technologiesList || []).join(",")
+        );
+        formData.append("projectDuration", project.projectDuration || "");
+        formData.append("projectRole", project.projectRole || "");
+        formData.append("projectLinks", project.link || "");
 
-      // Append the actual File object for upload
-      if (project.image instanceof File) {
-        formData.append("projectImages", project.image);
+        if (project.image instanceof File) {
+          // User changed the image → append directly
+          formData.append("projectImages", project.image);
+        } else if (typeof project.image === "string" && project.image) {
+          // Image unchanged → fetch blob and append
+          try {
+            const response = await fetch(project.image);
+            const blob = await response.blob();
+            const filename =
+              project.image.split("/").pop() || "project-image.jpg";
+            const file = new File([blob], filename, { type: blob.type });
+            formData.append("projectImages", file);
+          } catch (err) {
+            console.error("Failed to fetch existing project image", err);
+          }
+        }
       }
-    });
+    }
 
     // ---------- Personal Image ----------
     if (portfolio.personalImage instanceof File) {
@@ -183,7 +222,7 @@ export default function CreatePortfolio() {
     }
     // Append colorScheme
     if (portfolio.colorScheme !== null && portfolio.colorScheme !== undefined) {
-      formData.append("colorSchema", portfolio.colorScheme.toString());
+      formData.append("colorScheme", portfolio.colorScheme.toString());
     } else {
       toast.error("ColorScheme not selected!"); // Optional debug
     }
@@ -204,9 +243,17 @@ export default function CreatePortfolio() {
     request
       .then(() => {
         setLocation("/my-portfolios");
+        toast.dismiss();
+        toast.success(
+          `${editId ? "Updated portfolio successfully!" : "Added portfolio successfully!"}`
+        );
       })
       .catch(err => {
         console.error("Save failed", err);
+        toast.dismiss();
+        toast.error(
+          `${editId ? "Failed to updated portfolio!!" : "failed to Added portfolio!"}`
+        );
       })
       .finally(() => {
         setSaving(false);
@@ -339,6 +386,9 @@ export default function CreatePortfolio() {
     <div className="min-h-screen bg-white dark:bg-slate-900 flex flex-col">
       <Header />
       <ScrollToTop />
+      <p className="text-primary dark:text-white font-bold underline sm:text-2xl text-xl container mx-auto pt-2">
+        {editId ? " Update Portfolio" : " Create Portfolio"}
+      </p>
       <div className="flex-1 container mx-auto px-4 py-12">
         {/* Progress Bar */}
         <div className="mb-12 max-w-2xl mx-auto">
@@ -384,34 +434,64 @@ export default function CreatePortfolio() {
             <ScrollToTop />
             <div className="space-y-6">
               {/* Personal Image */}
+
               <div className="mt-6">
-                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                <label className="block text-sm font-semibold text-slate-900 mb-3">
                   Personal Image
-                </label>{" "}
-                {/* Optional preview */}
-                {portfolio.personalImagePreview && (
-                  <img
-                    src={portfolio.personalImagePreview}
-                    alt="Personal"
-                    className="w-32 h-32 object-cover rounded-full mb-2 shadow-md"
-                  />
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={e => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    // Store actual File
-                    updatePortfolio("personalImage", file);
-                    // Store preview separately
-                    updatePortfolio(
-                      "personalImagePreview",
-                      URL.createObjectURL(file)
-                    );
-                  }}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                />
+                </label>
+
+                <div className="flex flex-col items-start gap-3">
+                  {/* Image Preview */}
+                  <label className="relative cursor-pointer group">
+                    <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-slate-300 shadow-md flex items-center justify-center bg-slate-100">
+                      {portfolio.personalImagePreview ? (
+                        <img
+                          src={portfolio.personalImagePreview}
+                          alt="Personal"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-sm text-slate-500 text-center px-2">
+                          Upload Image
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+                      <span className="text-white text-xs font-medium">
+                        {portfolio.personalImagePreview
+                          ? "Change Image"
+                          : "Upload"}
+                      </span>
+                    </div>
+
+                    {/* Hidden File Input */}
+                    <input
+                      disabled={saving}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        updatePortfolio("personalImage", file);
+                        updatePortfolio(
+                          "personalImagePreview",
+                          URL.createObjectURL(file)
+                        );
+                      }}
+                    />
+                  </label>
+
+                  {/* Button text */}
+                  <span className="text-sm text-slate-600">
+                    {portfolio.personalImagePreview
+                      ? "Click image to change"
+                      : "Click to upload profile photo"}
+                  </span>
+                </div>
               </div>
 
               <div>
@@ -419,6 +499,7 @@ export default function CreatePortfolio() {
                   Full Name *
                 </label>
                 <input
+                  disabled={saving}
                   type="text"
                   value={portfolio.name}
                   onChange={e => updatePortfolio("name", e.target.value)}
@@ -437,6 +518,7 @@ export default function CreatePortfolio() {
                   Professional Title *
                 </label>
                 <input
+                  disabled={saving}
                   type="text"
                   value={portfolio.title}
                   onChange={e => updatePortfolio("title", e.target.value)}
@@ -450,23 +532,18 @@ export default function CreatePortfolio() {
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Introduction *
-                </label>
-                <textarea
-                  value={portfolio.intro}
-                  onChange={e => updatePortfolio("intro", e.target.value)}
-                  rows={4}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                    errors.intro ? "border-red-500" : "border-slate-300"
-                  }`}
-                  placeholder="Tell us about yourself..."
-                />
-                {errors.intro && (
-                  <p className="text-red-600 text-sm mt-1">{errors.intro}</p>
-                )}
-              </div>
+              <PortfolioField
+  field={{
+    key: "introduction",
+    label: "Introduction",
+    placeholder: "Tell us about yourself...",
+    rows: 4,
+  }}
+  value={portfolio.intro}
+  onChange={(val : any) => updatePortfolio("intro", val)}
+/>
+
+              
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
@@ -474,6 +551,7 @@ export default function CreatePortfolio() {
                     Email *
                   </label>
                   <input
+                    disabled={saving}
                     type="email"
                     value={portfolio.email}
                     onChange={e => updatePortfolio("email", e.target.value)}
@@ -491,6 +569,7 @@ export default function CreatePortfolio() {
                     Owner Email *
                   </label>
                   <input
+                    disabled={saving}
                     type="email"
                     value={ownerEmail}
                     onChange={e => updatePortfolio("ownerEmail", ownerEmail)}
@@ -511,6 +590,7 @@ export default function CreatePortfolio() {
                     Phone *
                   </label>
                   <input
+                    disabled={saving}
                     type="tel"
                     value={portfolio.phone}
                     onChange={e => updatePortfolio("phone", e.target.value)}
@@ -558,6 +638,7 @@ export default function CreatePortfolio() {
                   >
                     <div className="grid md:grid-cols-2 gap-4 mb-4">
                       <input
+                        disabled={saving}
                         type="text"
                         value={edu.institution}
                         onChange={e =>
@@ -567,6 +648,7 @@ export default function CreatePortfolio() {
                         className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                       />
                       <input
+                        disabled={saving}
                         type="text"
                         value={edu.degree}
                         onChange={e =>
@@ -578,6 +660,7 @@ export default function CreatePortfolio() {
                     </div>
                     <div className="grid md:grid-cols-2 gap-4 mb-4">
                       <input
+                        disabled={saving}
                         type="text"
                         value={edu.educationField}
                         onChange={e =>
@@ -587,6 +670,7 @@ export default function CreatePortfolio() {
                         className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                       />
                       <input
+                        disabled={saving}
                         type="text"
                         value={edu.year}
                         onChange={e =>
@@ -596,6 +680,7 @@ export default function CreatePortfolio() {
                         className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                       />
                       <input
+                        disabled={saving}
                         type="text"
                         value={edu.details}
                         onChange={e =>
@@ -606,6 +691,7 @@ export default function CreatePortfolio() {
                       />
                     </div>
                     <button
+                      disabled={saving}
                       onClick={() => removeEducation(idx)}
                       className="text-red-600 hover:text-red-700 font-semibold text-sm"
                     >
@@ -623,6 +709,7 @@ export default function CreatePortfolio() {
                   Skills
                 </h3>
                 <button
+                  disabled={saving}
                   onClick={addSkill}
                   className="text-blue-600 hover:text-blue-700 font-semibold"
                 >
@@ -637,6 +724,7 @@ export default function CreatePortfolio() {
                     className="flex items-center gap-4 p-4 border border-slate-200 rounded-lg"
                   >
                     <input
+                      disabled={saving}
                       type="text"
                       value={skill}
                       onChange={e => updateSkill(idx, e.target.value)}
@@ -645,6 +733,7 @@ export default function CreatePortfolio() {
                     />
 
                     <button
+                      disabled={saving}
                       onClick={() => removeSkill(idx)}
                       className="text-red-600 hover:text-red-700 font-semibold text-sm"
                     >
@@ -661,6 +750,7 @@ export default function CreatePortfolio() {
                   Qualifications
                 </h3>
                 <button
+                  disabled={saving}
                   onClick={() =>
                     setPortfolio((prev: any) => ({
                       ...prev,
@@ -680,6 +770,7 @@ export default function CreatePortfolio() {
                     className="flex items-center gap-4 p-4 border border-slate-200 rounded-lg"
                   >
                     <input
+                      disabled={saving}
                       type="text"
                       value={qual}
                       onChange={e => {
@@ -694,6 +785,7 @@ export default function CreatePortfolio() {
                       className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                     />
                     <button
+                      disabled={saving}
                       onClick={() => {
                         const updated = portfolio.qualifications.filter(
                           (_: any, i: number) => i !== idx
@@ -724,6 +816,7 @@ export default function CreatePortfolio() {
 
             <div className="mb-6 flex justify-end">
               <button
+                disabled={saving}
                 onClick={addExperience}
                 className="text-blue-600 hover:text-blue-700 font-semibold"
               >
@@ -739,6 +832,7 @@ export default function CreatePortfolio() {
                 >
                   <div className="grid md:grid-cols-2 gap-4 mb-4">
                     <input
+                      disabled={saving}
                       type="text"
                       value={exp.company}
                       onChange={e =>
@@ -748,6 +842,7 @@ export default function CreatePortfolio() {
                       className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                     />
                     <input
+                      disabled={saving}
                       type="text"
                       value={exp.position}
                       onChange={e =>
@@ -758,6 +853,7 @@ export default function CreatePortfolio() {
                     />
                   </div>
                   <input
+                    disabled={saving}
                     type="text"
                     value={exp.duration}
                     onChange={e =>
@@ -767,6 +863,7 @@ export default function CreatePortfolio() {
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 mb-4"
                   />
                   <textarea
+                    disabled={saving}
                     value={exp.description}
                     onChange={e =>
                       updateExperience(idx, "description", e.target.value)
@@ -776,6 +873,7 @@ export default function CreatePortfolio() {
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 mb-4"
                   />
                   <button
+                    disabled={saving}
                     onClick={() => removeExperience(idx)}
                     className="text-red-600 hover:text-red-700 font-semibold text-sm"
                   >
@@ -790,6 +888,7 @@ export default function CreatePortfolio() {
                 Additional Experience
               </label>
               <textarea
+                disabled={saving}
                 value={portfolio.additionalExperience}
                 onChange={e =>
                   updatePortfolio("additionalExperience", e.target.value)
@@ -806,6 +905,7 @@ export default function CreatePortfolio() {
 
               <div className="mb-6 flex justify-end">
                 <button
+                  disabled={saving}
                   onClick={addProject}
                   className="text-blue-600 hover:text-blue-700 font-semibold"
                 >
@@ -819,30 +919,60 @@ export default function CreatePortfolio() {
                     key={idx}
                     className="p-6 border border-slate-200 rounded-lg"
                   >
+                    <div className="space-y-3">
+                      <label className="block text-sm font-semibold text-slate-900">
+                        Project Image
+                      </label>
+
+                      <label className="relative w-52 block cursor-pointer group">
+                        {/* Image / Upload Box */}
+                        <div className="w-52 h-40 rounded-lg border border-slate-300 overflow-hidden flex items-center justify-center bg-slate-100">
+                          {project.image ? (
+                            <img
+                              src={
+                                typeof project.image === "string"
+                                  ? project.image
+                                  : URL.createObjectURL(project.image)
+                              }
+                              alt="Project Preview"
+                              className="w-52 h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-sm text-slate-500">
+                              Upload Project Image
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Hover Overlay */}
+                        <div className="w-52 absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center rounded-lg">
+                          <span className="text-white text-sm font-medium">
+                            {project.image ? "Change Image" : "Upload Image"}
+                          </span>
+                        </div>
+
+                        {/* Hidden File Input */}
+                        <input
+                          disabled={saving}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) updateProjectImage(idx, file);
+                          }}
+                        />
+                      </label>
+
+                      <p className="text-xs text-slate-500 pb-4">
+                        {project.image
+                          ? "Click the image to change it"
+                          : "Click to upload a project preview image"}
+                      </p>
+                    </div>
                     <div className="grid md:grid-cols-2 gap-4 mb-4">
                       <input
-                        type="file"
-                        accept="image/*"
-                        onChange={e => {
-                          const file = e.target.files?.[0];
-                          if (file) updateProjectImage(idx, file);
-                        }}
-                      />
-
-                      {/* Preview */}
-                      {project.image && (
-                        <img
-                          src={
-                            typeof project.image === "string"
-                              ? project.image // Backend URL
-                              : URL.createObjectURL(project.image) // Newly selected file
-                          }
-                          alt="Project Preview"
-                          className="w-full h-40 object-cover rounded-lg border"
-                        />
-                      )}
-
-                      <input
+                        disabled={saving}
                         type="text"
                         value={project.name}
                         onChange={e =>
@@ -853,6 +983,7 @@ export default function CreatePortfolio() {
                       />
 
                       <input
+                        disabled={saving}
                         type="text"
                         value={project.projectRole}
                         onChange={e =>
@@ -863,31 +994,36 @@ export default function CreatePortfolio() {
                       />
                     </div>
 
-                    <input
-                      type="text"
-                      value={project.technologiesList?.join(",") || ""}
-                      onChange={e =>
-                        updateProject(
-                          idx,
-                          "technologiesList",
-                          e.target.value.split(",")
-                        )
-                      }
-                      placeholder="e.g., React, Node.js, Tailwind"
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600"
-                    />
+                    <div className="grid md:grid-cols-2 gap-4 mb-4">
+                      <input
+                        disabled={saving}
+                        type="text"
+                        value={project.technologiesList?.join(",") || ""}
+                        onChange={e =>
+                          updateProject(
+                            idx,
+                            "technologiesList",
+                            e.target.value.split(",")
+                          )
+                        }
+                        placeholder="e.g., React, Node.js, Tailwind"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 mb-4"
+                      />
 
-                    <input
-                      type="text"
-                      value={project.projectDuration}
-                      onChange={e =>
-                        updateProject(idx, "projectDuration", e.target.value)
-                      }
-                      placeholder="Duration (e.g. Mar 2023 – Jun 2023)"
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 mb-4"
-                    />
+                      <input
+                        disabled={saving}
+                        type="text"
+                        value={project.projectDuration}
+                        onChange={e =>
+                          updateProject(idx, "projectDuration", e.target.value)
+                        }
+                        placeholder="Duration (e.g. Mar 2023 – Jun 2023)"
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 mb-4"
+                      />
+                    </div>
 
                     <textarea
+                      disabled={saving}
                       value={project.description}
                       onChange={e =>
                         updateProject(idx, "description", e.target.value)
@@ -898,6 +1034,7 @@ export default function CreatePortfolio() {
                     />
 
                     <input
+                      disabled={saving}
                       type="url"
                       value={project.link}
                       onChange={e => updateProject(idx, "link", e.target.value)}
@@ -906,6 +1043,7 @@ export default function CreatePortfolio() {
                     />
 
                     <button
+                      disabled={saving}
                       onClick={() => removeProject(idx)}
                       className="text-red-600 hover:text-red-700 font-semibold text-sm"
                     >
@@ -966,6 +1104,7 @@ export default function CreatePortfolio() {
                     t => t.id === portfolio.templateId
                   )?.colorSchemes.map(scheme => (
                     <button
+                      disabled={saving}
                       key={scheme.id}
                       onClick={() => updatePortfolio("colorScheme", scheme.id)}
                       className={`w-12 h-12 rounded-full border-4 transition ${
@@ -987,7 +1126,7 @@ export default function CreatePortfolio() {
         <div className="max-w-2xl mx-auto mt-12 flex gap-4 justify-between">
           <button
             onClick={handlePrevious}
-            disabled={step === 1}
+            disabled={step === 1 || saving}
             className="flex items-center gap-2 px-6 py-3 border border-slate-300 rounded-lg font-semibold text-slate-900 dark:text-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -1004,10 +1143,20 @@ export default function CreatePortfolio() {
             </button>
           ) : (
             <button
+              disabled={saving}
               onClick={handleSave}
               className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold text-white transition"
             >
-              Save Portfolio
+              {saving ? (
+                <span className="flex items-center gap-2">
+                  {" "}
+                  <Save className="animate-spin w-4 h-4" /> Saving...{" "}
+                </span>
+              ) : editId ? (
+                "Update Portfolio"
+              ) : (
+                "Save Portfolio"
+              )}
             </button>
           )}
         </div>

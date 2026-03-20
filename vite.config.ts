@@ -26,6 +26,15 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
+        proxy: {
+      // Every request starting with /api is forwarded to Flask
+      // No CORS issues because it's server-to-server, not browser-to-Flask
+      "/api": {
+        target: "http://127.0.0.1:8003",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
     host: true,
     hmr: {
       overlay: false, 

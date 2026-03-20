@@ -176,12 +176,13 @@ export function ProfessionalTemplate({
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1
+            <a
+              href={`#home`}
               className="text-2xl font-semibold tracking-tight"
               style={{ color: primaryColor }}
             >
               {portfolio.name}
-            </h1>
+            </a>
 
             <nav className="hidden md:flex items-center gap-10">
               {navItems.map(item => (
@@ -232,13 +233,16 @@ export function ProfessionalTemplate({
           backgroundColor: isDark ? `${primaryColor}10` : `${primaryColor}05`,
         }}
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div ref={heroRef.ref} className="max-w-3xl">
-            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-semibold leading-tight mb-6">
+        <div
+          ref={heroRef.ref}
+          className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center md:justify-between items-center flex-wrap-reverse"
+        >
+          <div className="max-w-2xl">
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-semibold leading-tight md:mb-6 mb-3">
               {portfolio.name}
             </h2>
             <p
-              className="text-2xl font-medium mb-8"
+              className="text-2xl font-medium mb-4 md:mb-8"
               style={{ color: primaryColor }}
             >
               {portfolio.title}
@@ -265,6 +269,13 @@ export function ProfessionalTemplate({
                 Call Me
               </a>
             </div>
+          </div>
+          <div>
+            <img
+              src={portfolio.personalImage}
+              alt="Profile"
+              className=" object-cover rounded-md pb-6 md:pb-0"
+            />
           </div>
         </div>
       </section>
@@ -293,12 +304,36 @@ export function ProfessionalTemplate({
           </div>
         </section>
       )}
+      {/* ==================== Qualification ==================== */}
+      {portfolio.qualifications.length > 0 && (
+        <section
+          id="skills"
+          className={`py-20 ${isDark ? "bg-slate-800" : "bg-blue-50"}`}
+        >
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <AnimatedSection>
+              <h3 className="text-4xl font-semibold mb-12">Qualifications</h3>
+            </AnimatedSection>
+            <AnimatedList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {portfolio.skills.map((qualification, idx) => (
+                <div
+                  key={idx}
+                  className={`px-6 py-4 rounded-2xl text-center font-medium transition-all border ${isDark ? "bg-slate-900 border-slate-700 hover:border-slate-600" : "bg-white border-slate-200 hover:border-slate-300 hover:shadow"}`}
+                  style={{ borderColor: `${primaryColor}30` }}
+                >
+                  {qualification}
+                </div>
+              ))}
+            </AnimatedList>
+          </div>
+        </section>
+      )}
 
       {/* ==================== EXPERIENCE ==================== */}
       {portfolio.experience.length > 0 && (
         <section
           id="experience"
-          className={`py-20 ${isDark ? "bg-slate-900" : "bg-white"}`}
+          className={`py-20 ${isDark ? "bg-slate-900" : "bg-slate-50"}`}
         >
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <AnimatedSection>
@@ -309,7 +344,7 @@ export function ProfessionalTemplate({
               {portfolio.experience.map((exp, idx) => (
                 <div
                   key={idx}
-                  className={`border-l-4 pl-8 py-2 ${isDark ? "border-slate-700" : "border-slate-200"}`}
+                  className={`border-l-4 border rounded-md pl-8 py-2 ${isDark ? "border-slate-700" : "border-slate-500"}`}
                   style={{ borderColor: primaryColor }}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-3">
@@ -364,7 +399,7 @@ export function ProfessionalTemplate({
                       {project.title}
                     </h4>
                     <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">
-                      {project.role} • {project.duration}
+                      {project.projectRole} • {project.projectDuration}
                     </p>
                     <p
                       className={`text-base leading-relaxed mb-6 line-clamp-3 ${isDark ? "text-slate-400" : "text-slate-600"}`}
@@ -405,12 +440,12 @@ export function ProfessionalTemplate({
               {portfolio.education.map((edu, idx) => (
                 <div
                   key={idx}
-                  className={`border-l-4 pl-8 py-2 ${isDark ? "border-slate-700" : "border-slate-200"}`}
+                  className={`border-l-4 pl-8 py-2 border rounded ${isDark ? "border-slate-700" : "border-slate-200"}`}
                   style={{ borderColor: primaryColor }}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-3">
                     <span className="font-semibold text-sm uppercase tracking-widest text-slate-500">
-                      {/* {edu.year} */}
+                      {edu.year}
                     </span>
                     <h4 className="text-2xl font-semibold">{edu.degree}</h4>
                   </div>
@@ -503,9 +538,12 @@ export function ModernTemplate({
       <header className="sticky top-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-xl sm:text-2xl font-black text-white">
+            <a
+              href="#home"
+              className="text-xl sm:text-2xl font-black text-white"
+            >
               {portfolio.name}
-            </h1>
+            </a>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
@@ -553,10 +591,12 @@ export function ModernTemplate({
 
       {/* Hero Section */}
       <section id="home" className="py-12 sm:py-20 lg:py-32 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          ref={heroRef.ref}
+          className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex  justify-between items-center flex-wrap-reverse"
+        >
           <div
-            ref={heroRef.ref}
-            className={`max-w-3xl ${heroRef.isVisible ? "animate-visible" : "animate-slide-up"}`}
+            className={`max-w-2xl ${heroRef.isVisible ? "animate-visible" : "animate-slide-up"}`}
           >
             <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black mb-4">
               {portfolio.name}
@@ -583,6 +623,7 @@ export function ModernTemplate({
               </a>
             </div>
           </div>
+          <img src={portfolio.personalImage} alt="profile image" className="object-cover pb-6 md:pb-0" />
         </div>
       </section>
 
@@ -611,82 +652,125 @@ export function ModernTemplate({
         </section>
       )}
 
-      {/* Projects Section */}
-      {portfolio.projects && portfolio.projects.length > 0 && (
-        <section
-          id="projects"
-          className={`py-12 sm:py-20 ${isDark ? "bg-slate-800" : "bg-white/10"}`}
-        >
+      {/* Qualification Section */}
+      {portfolio.qualifications.length > 0 && (
+        <section id="skills" className="py-12 sm:py-20 bg-white/5  border-t-2 ">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <AnimatedSection>
-              <h3 className="text-3xl sm:text-4xl font-bold mb-8 sm:mb-12 text-white">
-                Projects
+              <h3 className="text-3xl sm:text-4xl font-black text-white mb-8 sm:mb-12">
+                Qualifications
               </h3>
             </AnimatedSection>
-            <AnimatedList className="space-y-6 sm:space-y-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-                {portfolio.projects.map((project, idx) => (
-                  <div
-                    key={idx}
-                    className={`relative flex flex-col h-full rounded-xl overflow-hidden border-l-4 border-[#1250ca] shadow-md transition-shadow duration-300 hover:shadow-xl`}
-                  >
-                    {/* Animated background */}
-                    <div className="absolute p-6 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 transition z-0"></div>
-
-                    {/* Card content */}
-                    <div className="relative flex flex-col flex-1 p-4 gap-2 z-10  bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 transition dark:bg-slate-800">
-                      {/* Image */}
-                      {project.image && (
-                        <div className="relative w-full h-48 sm:h-56 lg:h-64 overflow-hidden">
-                          <img
-                            src={
-                              (project.image as string) || "/placeholder.png"
-                            }
-                            alt={project.title}
-                            className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                      )}
-
-                      {/* Text */}
-                      <h4 className="text-lg sm:text-xl font-bold text-white">
-                        {project.title}
-                      </h4>
-                      <p
-                        className={`text-sm font-medium ${isDark ? "text-slate-300" : "text-slate-100"}`}
-                      >
-                        {project.role}
-                      </p>
-                      <p
-                        className={`text-sm ${isDark ? "text-slate-400" : "text-slate-300"}`}
-                      >
-                        {project.duration}
-                      </p>
-                      <p
-                        className={`text-sm sm:text-base leading-relaxed flex-1 ${isDark ? "text-slate-300" : "text-slate-200"}`}
-                      >
-                        {project.description}
-                      </p>
-
-                      {/* Link */}
-                      {project.link && (
-                        <a
-                          href={project.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`mt-2 text-sm font-semibold underline ${isDark ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"} transition-colors`}
-                        >
-                          View Project
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <AnimatedList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+              {portfolio.qualifications.map((qualification, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 transition text-center"
+                >
+                  <p className="font-bold text-white text-sm sm:text-base">
+                    {qualification}
+                  </p>
+                </div>
+              ))}
             </AnimatedList>
           </div>
         </section>
       )}
+
+      {/* Projects Section */}
+      {portfolio.projects && portfolio.projects.length > 0 && (
+  <section
+    id="projects"
+    className={`py-12 sm:py-20 ${isDark ? "bg-slate-800" : "bg-white/10"}`}
+  >
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <AnimatedSection>
+        <h3 className="text-3xl sm:text-4xl font-bold mb-8 sm:mb-12 text-white">
+          Projects
+        </h3>
+      </AnimatedSection>
+      <AnimatedList className="space-y-6 sm:space-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+          {portfolio.projects.map((project, idx) => (
+            <div
+              key={idx}
+              className="relative flex flex-col h-full rounded-xl overflow-hidden border-l-4 border-[#1250ca] shadow-md transition-shadow duration-300 hover:shadow-xl"
+            >
+              {/* Card content */}
+              <div className="relative flex flex-col flex-1 p-4 gap-2 z-10 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 transition dark:bg-slate-800">
+                
+                {/* Image */}
+                {project.image && (
+                  <div className="relative w-full h-48 sm:h-56 lg:h-64 overflow-hidden rounded-lg">
+                    <img
+                      src={project.image || "/placeholder.png"}
+                      alt={project.name}
+                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                )}
+
+                {/* Title */}
+                <h4 className="text-lg sm:text-xl font-bold text-white">
+                  {project.name}
+                </h4>
+
+                {/* Role */}
+                <p className={`text-sm font-medium ${isDark ? "text-slate-300" : "text-slate-100"}`}>
+                  {project.projectRole}
+                </p>
+
+                {/* Duration */}
+                <p className={`text-sm ${isDark ? "text-slate-400" : "text-slate-300"}`}>
+                  {project.projectDuration}
+                </p>
+
+                {/* Description */}
+                <p className={`text-sm sm:text-base leading-relaxed flex-1 ${isDark ? "text-slate-300" : "text-slate-200"}`}>
+                  {project.description}
+                </p>
+
+                {/* Technologies */}
+                {project.technologiesList && project.technologiesList.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {project.technologiesList.map((tech, i) => (
+                      <span
+                        key={i}
+                        className={`px-2 py-1 text-xs rounded-md font-medium ${
+                          isDark
+                            ? "bg-slate-700 text-slate-200"
+                            : "bg-slate-200 text-slate-700"
+                        }`}
+                      >
+                        {tech.trim()}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Link */}
+                {project.link && (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`mt-2 text-sm font-semibold underline ${
+                      isDark
+                        ? "text-blue-400 hover:text-blue-300"
+                        : "text-blue-600 hover:text-blue-700"
+                    } transition-colors`}
+                  >
+                    View Project
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </AnimatedList>
+    </div>
+  </section>
+)}
 
       {/* Experience Section */}
       {portfolio.experience.length > 0 && (
@@ -791,12 +875,13 @@ export function CreativeTemplate({
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1
+            <a
+              href="#home"
               className="text-xl sm:text-2xl font-black"
               style={{ color: colorScheme.primary }}
             >
               {portfolio.name}
-            </h1>
+            </a>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-6 lg:gap-8">
@@ -851,10 +936,9 @@ export function CreativeTemplate({
         className="py-12 sm:py-20 lg:py-32 text-white"
         style={{ backgroundColor: colorScheme.primary }}
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div ref={heroRef.ref} className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center md:justify-between flex-wrap-reverse ">
           <div
-            ref={heroRef.ref}
-            className={`max-w-3xl ${heroRef.isVisible ? "animate-visible" : "animate-slide-up"}`}
+            className={` max-w-2xl ${heroRef.isVisible ? "animate-visible" : "animate-slide-up"}`}
           >
             <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black mb-4">
               {portfolio.name}
@@ -880,6 +964,7 @@ export function CreativeTemplate({
               </a>
             </div>
           </div>
+          <img src={portfolio.personalImage} alt="portfolio Image" className="object-cover md:pb-0 pb-6" />
         </div>
       </section>
 
@@ -975,11 +1060,11 @@ export function CreativeTemplate({
                       </h4>
 
                       <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">
-                        {project.role}
+                        {project.projectRole}
                       </p>
 
                       <p className="text-xs text-slate-500 dark:text-slate-500 mb-4">
-                        {project.duration}
+                        {project.projectDuration}
                       </p>
 
                       <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 flex-1 line-clamp-3">
@@ -1345,9 +1430,9 @@ export function DeveloperTemplate({
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="font-bold text-lg tracking-tight">
+            <a href="#home" className="font-bold text-lg tracking-tight">
               {portfolio.name}
-            </div>
+            </a>
 
             <nav className="hidden md:flex items-center gap-8">
               {navItems.map(item => (
@@ -1387,12 +1472,13 @@ export function DeveloperTemplate({
               ))}
             </nav>
           )}
+          
         </div>
       </header>
 
       {/* ==================== HERO ==================== */}
       <section id="home" className="py-12 lg:py-20 relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center md:justify-between">
           <AnimatedSection>
             <div className="space-y-8 max-w-4xl">
               <div className="space-y-6">
@@ -1448,6 +1534,7 @@ export function DeveloperTemplate({
               </div>
             </div>
           </AnimatedSection>
+          <AnimatedSection > <img src={portfolio.personalImage} alt="portfolio Image" className="object-cover md:pb-0 pb-6" /></AnimatedSection>
         </div>
       </section>
 
@@ -1555,10 +1642,10 @@ export function DeveloperTemplate({
                         {project.title}
                       </h4>
                       <p className="text-sm text-slate-600 dark:text-slate-400">
-                        {project.role}
+                        {project.projectRole}
                       </p>
                       <p className="text-xs text-slate-500 dark:text-slate-500 mb-4">
-                        {project.duration}
+                        {project.projectDuration}
                       </p>
                       <p className="text-sm leading-relaxed flex-1 text-slate-600 dark:text-slate-400 line-clamp-3">
                         {project.description}
@@ -1708,7 +1795,7 @@ export function DeveloperTemplate({
                       className={`p-8 rounded-3xl border transition-all group-hover:-translate-y-1 ${isDark ? "bg-slate-800 border-slate-700" : "bg-white border-gray-100"}`}
                     >
                       <div
-                        className="absolute -top-4  px-6 py-1.5 rounded-full text-sm font-bold text-white"
+                        className="absolute  -top-4  px-6 py-1.5 rounded-full text-sm font-bold text-primary dark:text-white"
                         style={{ backgroundColor: colorScheme.primary }}
                       >
                         {edu.year}

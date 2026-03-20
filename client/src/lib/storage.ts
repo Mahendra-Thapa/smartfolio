@@ -5,6 +5,7 @@ export interface Portfolio {
   intro: string;
   email: string;
   phone: string;
+  personalImage: string;
   education: Array<{
     institution: string;
     degree: string;
@@ -22,8 +23,8 @@ export interface Portfolio {
   additionalExperience: string;
   projects: Array<{
     title: string;
-    role: string;
-    duration: string;
+    projectRole: string;
+    projectDuration: string;
     description: string;
     link: string;
     image?: File | string;
