@@ -37,7 +37,7 @@ export default function ViewPortfolio() {
     setLoading(true);
 
     axiosAuthInstance
-      .get(`/api/portfolios/${portfolioId}`)
+      .get(`/api/portfolio/${portfolioId}`)
       .then(res => {
         const p = res.data;
 
