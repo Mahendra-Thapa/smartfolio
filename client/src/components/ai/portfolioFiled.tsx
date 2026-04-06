@@ -21,7 +21,7 @@ interface Field {
   label: string;
   key: string;
   rows?: number;
-  placeholder :string;
+  placeholder: string;
 }
 
 interface PortfolioFieldProps {
@@ -56,7 +56,11 @@ function ActionButton({
       "bg-violet-600/15 hover:bg-violet-600/25 border border-violet-500/25 hover:border-violet-500/45 text-violet-300 hover:text-violet-100",
   };
   return (
-    <button onClick={onClick} disabled={disabled} className={`${base} ${styles[variant]}`}>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`${base} ${styles[variant]}`}
+    >
       {icon}
       {label}
     </button>
@@ -113,14 +117,13 @@ export default function PortfolioField({
   };
 
   return (
-    <div className="group relative rounded-2xl bg-zinc-900/50 border border-zinc-800/80 p-4 transition-all duration-300 hover:border-zinc-700/80 hover:bg-zinc-900/70 hover:shadow-2xl hover:shadow-black/40">
-
+    <div className="group relative rounded-2xl  border  p-2  duration-300   ">
       {/* Subtle gradient top edge */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-zinc-600/40 to-transparent" />
 
       {/* ── Label row ── */}
       <div className="flex items-center justify-between mb-3">
-        <label className="text-[11px] font-bold tracking-[0.14em] text-zinc-400 uppercase select-none">
+        <label className="text-[11px] font-bold tracking-[0.14em] text-zinc-400 dark:text-white uppercase select-none">
           {field.label}
         </label>
         <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/8 border border-violet-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-violet-400 tracking-wide select-none">
@@ -133,10 +136,10 @@ export default function PortfolioField({
       <div className="relative">
         <textarea
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           rows={field.rows ?? 4}
           placeholder={`${field.placeholder}`}
-          className="w-full resize-none rounded-xl bg-zinc-950/70 border border-zinc-800 text-sm text-zinc-100 placeholder-zinc-600/70 p-3 pr-10 leading-relaxed transition-all duration-200 focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/10 focus:bg-zinc-950/90"
+          className="w-full resize-none rounded-xl  border  text-sm dark:text-zinc-100 text-black placeholder-zinc-600/70 dark:placeholder:text-gray-200 p-3 pr-10 leading-relaxed transition-all duration-200 focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/10 "
         />
         {isLoading && (
           <div className="absolute top-3 right-3 flex items-center justify-center">
@@ -172,12 +175,12 @@ export default function PortfolioField({
       {banner && (
         <div
           className={`mt-3 flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-medium border transition-all duration-200 ${
-            banner.success
+            banner.ok
               ? "bg-emerald-500/8 border-emerald-500/20 text-emerald-400"
               : "bg-amber-500/8 border-amber-500/20 text-amber-400"
           }`}
         >
-          {banner.success ? (
+          {banner.ok ? (
             <CheckCircle2 size={13} strokeWidth={2} className="flex-shrink-0" />
           ) : (
             <AlertCircle size={13} strokeWidth={2} className="flex-shrink-0" />
@@ -206,14 +209,14 @@ export default function PortfolioField({
               <button
                 key={i}
                 onClick={() => applyCompletion(c)}
-                className="group/item flex w-full items-start gap-2.5 rounded-xl bg-zinc-800/50 hover:bg-zinc-800/90 border border-zinc-700/30 hover:border-violet-500/25 px-3 py-2.5 text-xs text-zinc-400 hover:text-zinc-100 text-left transition-all duration-150"
+                className="group/item flex items-center w-full gap-2.5 rounded-xl bg-zinc-800/50 border border-zinc-700/30 hover:border-violet-500/25 px-3 py-2.5 text-xs text-zinc-400 hover:text-zinc-100 text-left transition-all duration-150"
               >
                 <ChevronRight
                   size={11}
                   strokeWidth={2.5}
-                  className="mt-0.5 flex-shrink-0 text-zinc-600 group-hover/item:text-violet-400 transition-colors"
+                  className="mt-0.5 flex-shrink-0 text-white dark:text-zinc-600 group-hover/item:text-violet-400 transition-colors"
                 />
-                <span className="leading-relaxed">{c}</span>
+                <span className="leading-relaxed text-white">{c}</span>
               </button>
             ))}
           </div>
@@ -238,7 +241,7 @@ export default function PortfolioField({
           </div>
           {/* Panel body */}
           <div className="px-3 py-3">
-            <p className="text-xs text-zinc-300/90 leading-relaxed mb-3">
+            <p className="text-xs  dark:text-zinc-300/90 leading-relaxed mb-3">
               {rewrite.rewritten}
             </p>
             <button

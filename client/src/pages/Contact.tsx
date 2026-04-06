@@ -1,8 +1,12 @@
+"use client";
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ScrollToTop from "@/components/ScrollToTop";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 import { useState } from "react";
-import ScrollToTop from "@/components/ScrollToTop";
+import { toast } from "react-hot-toast";
+import { axiosInstance } from "@/utils/axiosInstance";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -11,7 +15,7 @@ export default function Contact() {
     subject: "",
     message: "",
   });
-  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -20,33 +24,41 @@ export default function Contact() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate form submission
-    console.log("Form submitted:", formData);
-    setSubmitted(true);
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    setTimeout(() => setSubmitted(false), 3000);
+    setLoading(true);
+
+    try {
+      const response = await axiosInstance.post("/api/contact/send", formData);
+      toast.success("Message sent successfully!");
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (error: any) {
+      console.error(error);
+      toast.error(
+        error?.response?.data?.message || "Failed to send message. Try again!"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
       <ScrollToTop />
+
       {/* Page Header */}
       <section
         className="relative bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-800 py-28"
         style={{
           backgroundImage:
-            "url('https://static.vecteezy.com/system/resources/thumbnails/007/925/803/small/contact-us-concept-the-icons-such-as-phone-e-mail-address-chat-global-communication-for-presentation-web-banner-and-article-business-and-network-connection-and-company-vector.jpg')", // replace with your background image path
+            "url('https://static.vecteezy.com/system/resources/thumbnails/007/925/803/small/contact-us-concept-the-icons-such-as-phone-e-mail-address-chat-global-communication-for-presentation-web-banner-and-article-business-and-network-connection-and-company-vector.jpg')",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           backgroundSize: "cover",
         }}
       >
-        {/* Overlay for readability */}
         <div className="absolute inset-0 bg-black/10 dark:bg-black/40"></div>
-
         <div className="relative container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Contact Us
@@ -66,7 +78,6 @@ export default function Contact() {
               <h2 className="text-3xl font-bold text-slate-900 text-white mb-8">
                 Get in Touch
               </h2>
-
               <div className="space-y-8">
                 {[
                   {
@@ -110,34 +121,13 @@ export default function Contact() {
                   </div>
                 ))}
               </div>
-
-              {/* <div className="mt-12 p-8 bg-blue-50 rounded-lg">
-                <h3 className="text-lg font-semibold text-slate-900 mb-3">
-                  Business Hours
-                </h3>
-                <p className="text-slate-600 mb-2">
-                  Monday - Friday: 9:00 AM - 6:00 PM
-                </p>
-                <p className="text-slate-600 mb-2">
-                  Saturday: 10:00 AM - 4:00 PM
-                </p>
-                <p className="text-slate-600">Sunday: Closed</p>
-              </div> */}
             </div>
 
             {/* Contact Form */}
             <div>
               <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">
-                Send us a Message
+                Send us a message
               </h2>
-
-              {submitted && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg ">
-                  <p className="text-green-800 font-medium">
-                    Thank you! Your message has been sent successfully.
-                  </p>
-                </div>
-              )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
@@ -145,6 +135,7 @@ export default function Contact() {
                     Name
                   </label>
                   <input
+                    disabled={loading}
                     type="text"
                     name="name"
                     value={formData.name}
@@ -160,13 +151,14 @@ export default function Contact() {
                     Email
                   </label>
                   <input
+                    disabled={loading}
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    placeholder="your@email.com dark:text-white"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:text-white"
+                    placeholder="your@email.com"
                   />
                 </div>
 
@@ -175,6 +167,7 @@ export default function Contact() {
                     Subject
                   </label>
                   <input
+                    disabled={loading}
                     type="text"
                     name="subject"
                     value={formData.subject}
@@ -190,6 +183,7 @@ export default function Contact() {
                     Message
                   </label>
                   <textarea
+                    disabled={loading}
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
@@ -202,10 +196,11 @@ export default function Contact() {
 
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                  disabled={loading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <Send className="w-5 h-5" />
-                  Send Message
+                  {loading ? "Sending..." : "Send Message"}
                 </button>
               </form>
             </div>

@@ -22,12 +22,14 @@ export interface Portfolio {
   }>;
   additionalExperience: string;
   projects: Array<{
-    title: string;
+    name: string;
     projectRole: string;
     projectDuration: string;
     description: string;
     link: string;
     image?: File | string;
+    technologiesList: String[]
+    
   }>;
   templateId: string;
   colorScheme: string;

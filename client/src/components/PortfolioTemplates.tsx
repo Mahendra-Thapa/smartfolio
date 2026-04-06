@@ -235,14 +235,14 @@ export function ProfessionalTemplate({
       >
         <div
           ref={heroRef.ref}
-          className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center md:justify-between items-center flex-wrap-reverse"
+          className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-center md:justify-between items-center gap-12"
         >
           <div className="max-w-2xl">
-            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-semibold leading-tight md:mb-6 mb-3">
+            <h2 className="text-xl sm:text-4xl lg:text-5xl font-semibold leading-tight md:mb-6 mb-3">
               {portfolio.name}
             </h2>
             <p
-              className="text-2xl font-medium mb-4 md:mb-8"
+              className="text-xl sm:text-2xl lg:text-3xl font-medium mb-4 md:mb-8"
               style={{ color: primaryColor }}
             >
               {portfolio.title}
@@ -270,11 +270,11 @@ export function ProfessionalTemplate({
               </a>
             </div>
           </div>
-          <div>
+          <div className="flex-shrink-0 w-48 h-48 md:w-72 md:h-80 md:mt-0 mt-8 group">
             <img
               src={portfolio.personalImage}
               alt="Profile"
-              className=" object-cover rounded-md pb-6 md:pb-0"
+              className="w-full h-full object-cover rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]"
             />
           </div>
         </div>
@@ -315,7 +315,7 @@ export function ProfessionalTemplate({
               <h3 className="text-4xl font-semibold mb-12">Qualifications</h3>
             </AnimatedSection>
             <AnimatedList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {portfolio.skills.map((qualification, idx) => (
+              {portfolio.qualifications.map((qualification, idx) => (
                 <div
                   key={idx}
                   className={`px-6 py-4 rounded-2xl text-center font-medium transition-all border ${isDark ? "bg-slate-900 border-slate-700 hover:border-slate-600" : "bg-white border-slate-200 hover:border-slate-300 hover:shadow"}`}
@@ -388,15 +388,15 @@ export function ProfessionalTemplate({
                   {project.image && (
                     <div className="h-56 overflow-hidden">
                       <img
-                        src={(project.image as string) || "/placeholder.png"}
-                        alt={project.title}
+                        src={project.image.toString() || "/placeholder.png"}
+                        alt={project.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>
                   )}
                   <div className="p-7">
                     <h4 className="font-semibold text-xl mb-2">
-                      {project.title}
+                      {project.name}
                     </h4>
                     <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">
                       {project.projectRole} • {project.projectDuration}
@@ -593,15 +593,15 @@ export function ModernTemplate({
       <section id="home" className="py-12 sm:py-20 lg:py-32 text-white">
         <div
           ref={heroRef.ref}
-          className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex  justify-between items-center flex-wrap-reverse"
+          className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-12"
         >
           <div
             className={`max-w-2xl ${heroRef.isVisible ? "animate-visible" : "animate-slide-up"}`}
           >
-            <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black mb-4">
+            <h2 className="text-xl sm:text-3xl lg:text-5xl font-black mb-4">
               {portfolio.name}
             </h2>
-            <p className="text-2xl sm:text-3xl font-bold mb-6 opacity-90">
+            <p className="text-xl sm:text-2xl font-bold mb-6 opacity-90">
               {portfolio.title}
             </p>
             <p className="text-base sm:text-lg leading-relaxed mb-8 opacity-80">
@@ -623,7 +623,13 @@ export function ModernTemplate({
               </a>
             </div>
           </div>
-          <img src={portfolio.personalImage} alt="profile image" className="object-cover pb-6 md:pb-0" />
+          <div className="flex-shrink-0 w-48 h-48 md:w-72 md:h-80 md:mt-0 mt-8 group">
+            <img
+              src={portfolio.personalImage}
+              alt="profile image"
+              className="w-full h-full object-cover rounded-2xl shadow-2xl skew-y-3 transition-transform duration-500 group-hover:skew-y-0"
+            />
+          </div>
         </div>
       </section>
 
@@ -679,98 +685,106 @@ export function ModernTemplate({
 
       {/* Projects Section */}
       {portfolio.projects && portfolio.projects.length > 0 && (
-  <section
-    id="projects"
-    className={`py-12 sm:py-20 ${isDark ? "bg-slate-800" : "bg-white/10"}`}
-  >
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <AnimatedSection>
-        <h3 className="text-3xl sm:text-4xl font-bold mb-8 sm:mb-12 text-white">
-          Projects
-        </h3>
-      </AnimatedSection>
-      <AnimatedList className="space-y-6 sm:space-y-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-          {portfolio.projects.map((project, idx) => (
-            <div
-              key={idx}
-              className="relative flex flex-col h-full rounded-xl overflow-hidden border-l-4 border-[#1250ca] shadow-md transition-shadow duration-300 hover:shadow-xl"
-            >
-              {/* Card content */}
-              <div className="relative flex flex-col flex-1 p-4 gap-2 z-10 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 transition dark:bg-slate-800">
-                
-                {/* Image */}
-                {project.image && (
-                  <div className="relative w-full h-48 sm:h-56 lg:h-64 overflow-hidden rounded-lg">
-                    <img
-                      src={project.image || "/placeholder.png"}
-                      alt={project.name}
-                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                )}
-
-                {/* Title */}
-                <h4 className="text-lg sm:text-xl font-bold text-white">
-                  {project.name}
-                </h4>
-
-                {/* Role */}
-                <p className={`text-sm font-medium ${isDark ? "text-slate-300" : "text-slate-100"}`}>
-                  {project.projectRole}
-                </p>
-
-                {/* Duration */}
-                <p className={`text-sm ${isDark ? "text-slate-400" : "text-slate-300"}`}>
-                  {project.projectDuration}
-                </p>
-
-                {/* Description */}
-                <p className={`text-sm sm:text-base leading-relaxed flex-1 ${isDark ? "text-slate-300" : "text-slate-200"}`}>
-                  {project.description}
-                </p>
-
-                {/* Technologies */}
-                {project.technologiesList && project.technologiesList.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {project.technologiesList.map((tech, i) => (
-                      <span
-                        key={i}
-                        className={`px-2 py-1 text-xs rounded-md font-medium ${
-                          isDark
-                            ? "bg-slate-700 text-slate-200"
-                            : "bg-slate-200 text-slate-700"
-                        }`}
-                      >
-                        {tech.trim()}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Link */}
-                {project.link && (
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`mt-2 text-sm font-semibold underline ${
-                      isDark
-                        ? "text-blue-400 hover:text-blue-300"
-                        : "text-blue-600 hover:text-blue-700"
-                    } transition-colors`}
+        <section
+          id="projects"
+          className={`py-12 sm:py-20 ${isDark ? "bg-slate-800" : "bg-white/10"}`}
+        >
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <AnimatedSection>
+              <h3 className="text-3xl sm:text-4xl font-bold mb-8 sm:mb-12 text-white">
+                Projects
+              </h3>
+            </AnimatedSection>
+            <AnimatedList className="space-y-6 sm:space-y-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+                {portfolio.projects.map((project, idx) => (
+                  <div
+                    key={idx}
+                    className="relative flex flex-col h-full rounded-xl overflow-hidden border-l-4 border-[#1250ca] shadow-md transition-shadow duration-300 hover:shadow-xl"
                   >
-                    View Project
-                  </a>
-                )}
+                    {/* Card content */}
+                    <div className="relative flex flex-col flex-1 p-4 gap-2 z-10 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 transition dark:bg-slate-800">
+                      {/* Image */}
+                      {project.image && (
+                        <div className="relative w-full h-48 sm:h-56 lg:h-64 overflow-hidden rounded-lg">
+                          <img
+                            src={
+                              project?.image.toString() || "/placeholder.png"
+                            }
+                            alt={project.name ?? "project image"}
+                            className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
+
+                      {/* Title */}
+                      <h4 className="text-lg sm:text-xl font-bold text-white">
+                        {project.name}
+                      </h4>
+
+                      {/* Role */}
+                      <p
+                        className={`text-sm font-medium ${isDark ? "text-slate-300" : "text-slate-100"}`}
+                      >
+                        {project.projectRole}
+                      </p>
+
+                      {/* Duration */}
+                      <p
+                        className={`text-sm ${isDark ? "text-slate-400" : "text-slate-300"}`}
+                      >
+                        {project.projectDuration}
+                      </p>
+
+                      {/* Description */}
+                      <p
+                        className={`text-sm sm:text-base leading-relaxed flex-1 ${isDark ? "text-slate-300" : "text-slate-200"}`}
+                      >
+                        {project.description}
+                      </p>
+
+                      {/* Technologies */}
+                      {project.technologiesList &&
+                        project.technologiesList.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {project.technologiesList.map((tech, i) => (
+                              <span
+                                key={i}
+                                className={`px-2 py-1 text-xs rounded-md font-medium ${
+                                  isDark
+                                    ? "bg-slate-700 text-slate-200"
+                                    : "bg-slate-200 text-slate-700"
+                                }`}
+                              >
+                                {tech.trim()}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                      {/* Link */}
+                      {project.link && (
+                        <a
+                          href={project.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`mt-2 text-sm font-semibold underline ${
+                            isDark
+                              ? "text-blue-400 hover:text-blue-300"
+                              : "text-blue-600 hover:text-blue-700"
+                          } transition-colors`}
+                        >
+                          View Project
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
-        </div>
-      </AnimatedList>
-    </div>
-  </section>
-)}
+            </AnimatedList>
+          </div>
+        </section>
+      )}
 
       {/* Experience Section */}
       {portfolio.experience.length > 0 && (
@@ -834,6 +848,51 @@ export function ModernTemplate({
         </section>
       )}
 
+      {/* Contact Section */}
+      <section
+        id="contact"
+        className="py-12 sm:py-20 bg-white/5 text-white border-t border-white/10"
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <AnimatedSection>
+            <h3 className="text-3xl sm:text-4xl font-black mb-6">
+              Get In Touch
+            </h3>
+
+            <p className="text-base sm:text-lg opacity-80 max-w-2xl mx-auto mb-10">
+              I'm open to opportunities, collaborations, or just a friendly
+              chat. Feel free to reach out anytime.
+            </p>
+
+            {/* Buttons */}
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              {/* Email */}
+              <a
+                href={`mailto:${portfolio.email}`}
+                className="flex items-center justify-center gap-3 px-6 py-3 bg-white text-slate-900 rounded-lg font-bold hover:bg-slate-100 transition"
+                style={{ color: bgColor }}
+              >
+                <Mail className="w-5 h-5" />
+                Email Me
+              </a>
+
+              {/* Call */}
+              <a
+                href={`tel:${portfolio.phone}`}
+                className="flex items-center justify-center gap-3 px-6 py-3 border-2 border-white text-white rounded-lg font-bold hover:bg-white/10 transition"
+              >
+                <Phone className="w-5 h-5" />
+                Call Me
+              </a>
+            </div>
+
+            {/* Optional subtle line */}
+            <p className="mt-8 text-xs opacity-60 tracking-wider uppercase">
+              Available for freelance & full-time roles
+            </p>
+          </AnimatedSection>
+        </div>
+      </section>
       {/* Footer */}
       <footer className="bg-black/30 text-white py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -936,14 +995,17 @@ export function CreativeTemplate({
         className="py-12 sm:py-20 lg:py-32 text-white"
         style={{ backgroundColor: colorScheme.primary }}
       >
-        <div ref={heroRef.ref} className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center md:justify-between flex-wrap-reverse ">
+        <div
+          ref={heroRef.ref}
+          className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-12"
+        >
           <div
             className={` max-w-2xl ${heroRef.isVisible ? "animate-visible" : "animate-slide-up"}`}
           >
-            <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black mb-4">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black mb-4">
               {portfolio.name}
             </h2>
-            <p className="text-2xl sm:text-3xl font-bold mb-6 opacity-90">
+            <p className="text-xl sm:text-2xl font-bold mb-6 opacity-90">
               {portfolio.title}
             </p>
             <p className="text-base sm:text-lg leading-relaxed mb-8 opacity-80">
@@ -964,7 +1026,13 @@ export function CreativeTemplate({
               </a>
             </div>
           </div>
-          <img src={portfolio.personalImage} alt="portfolio Image" className="object-cover md:pb-0 pb-6" />
+          <div className="flex-shrink-0 w-48 h-48 md:w-72 md:h-80 md:mt-0 mt-8 group">
+            <img
+              src={portfolio.personalImage}
+              alt="portfolio Image"
+              className="w-full h-full object-cover rounded-full border-4 border-white shadow-2xl transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
         </div>
       </section>
 
@@ -1031,7 +1099,7 @@ export function CreativeTemplate({
                       <div className="relative h-56 overflow-hidden">
                         <img
                           src={(project.image as string) || "/placeholder.png"}
-                          alt={project.title}
+                          alt={project.name}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
                         {/* Gradient Overlay */}
@@ -1056,7 +1124,7 @@ export function CreativeTemplate({
                     {/* Content */}
                     <div className="flex-1 p-6 flex flex-col">
                       <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-2 line-clamp-2">
-                        {project.title}
+                        {project.name}
                       </h4>
 
                       <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">
@@ -1472,13 +1540,12 @@ export function DeveloperTemplate({
               ))}
             </nav>
           )}
-          
         </div>
       </header>
 
       {/* ==================== HERO ==================== */}
       <section id="home" className="py-12 lg:py-20 relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center md:justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-20">
           <AnimatedSection>
             <div className="space-y-8 max-w-4xl">
               <div className="space-y-6">
@@ -1489,7 +1556,7 @@ export function DeveloperTemplate({
                   <span className="opacity-70">{"<"}</span>developer
                   <span className="opacity-70">{">"}</span>
                 </div>
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold leading-tight">
                   {portfolio.name}
                 </h1>
                 <div
@@ -1534,7 +1601,16 @@ export function DeveloperTemplate({
               </div>
             </div>
           </AnimatedSection>
-          <AnimatedSection > <img src={portfolio.personalImage} alt="portfolio Image" className="object-cover md:pb-0 pb-6" /></AnimatedSection>
+          <AnimatedSection>
+            {" "}
+            <div className="flex-shrink-0 w-48 h-48 md:w-72 md:h-72 md:mt-0 mt-8 group">
+              <img
+                src={portfolio.personalImage}
+                alt="portfolio Image"
+                className="w-full h-full object-cover rounded-xl border border-slate-700 shadow-2xl  hover:grayscale-0 transition-all duration-500"
+              />
+            </div>
+          </AnimatedSection>
         </div>
       </section>
 
@@ -1619,7 +1695,7 @@ export function DeveloperTemplate({
                       <div className="relative h-56 overflow-hidden">
                         <img
                           src={(project.image as string) || "/placeholder.png"}
-                          alt={project.title}
+                          alt={project.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -1638,9 +1714,7 @@ export function DeveloperTemplate({
                       </div>
                     )}
                     <div className="p-6 flex-1 flex flex-col">
-                      <h4 className="font-bold text-xl mb-2">
-                        {project.title}
-                      </h4>
+                      <h4 className="font-bold text-xl mb-2">{project.name}</h4>
                       <p className="text-sm text-slate-600 dark:text-slate-400">
                         {project.projectRole}
                       </p>

@@ -1,34 +1,24 @@
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TEMPLATES } from "@/components/PortfolioTemplates";
-import { Link } from "wouter";
-import { Eye } from "lucide-react";
-import { useState } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 import TemplatePreview from "@/components/preview/TemplatePreview";
+import { Eye } from "lucide-react";
+import { useState } from "react";
+import { Link } from "wouter";
 
-export default function Templates() {
+export default function AdminTemplates() {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 flex flex-col">
-      <Header />
-      <ScrollToTop />
-      {/* Page Header */}
+    
       <section
-        className="relative bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-800 dark:to-slate-800 py-28"
-        style={{
-          backgroundImage: `url('https://t3.ftcdn.net/jpg/16/67/66/16/360_F_1667661606_1w7kl0okt3afGXVCSfQ7GEjzxR6OVYPB.jpg')`, // replace with your image path
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-        }}
+       
       >
-        {/* Overlay for readability */}
-        <div className="absolute inset-0 bg-black/10 dark:bg-black/40"></div>
+       
 
         <div className="relative container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+          <h1 className="text-2xl md:text-4xl font-bold text-slate-900 dark:text-white my-4">
             Portfolio Templates
           </h1>
           <p className="text-xl text-slate-600 dark:text-white/75">
@@ -110,46 +100,9 @@ export default function Templates() {
       </section>
       
 
-      {/* Template Features */}
-      <section className="py-20 bg-slate-50 dark:bg-slate-800 ">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-slate-900 text-center mb-12 dark:text-white">
-            All Templates Include
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-4xl mx-auto">
-            {[
-              {
-                title: "Responsive Design",
-                description: "Works perfectly on all devices and screen sizes",
-              },
-              {
-                title: "Customizable Colors",
-                description:
-                  "Choose from multiple color schemes for each template",
-              },
-              {
-                title: "Easy to Edit",
-                description:
-                  "Simple interface to update your portfolio anytime",
-              },
-              {
-                title: "Professional Look",
-                description:
-                  "Impress employers and clients with a polished design",
-              },
-            ].map((feature, idx) => (
-              <div key={idx} className="bg-white p-6 rounded-lg">
-                <h3 className="font-semibold text-slate-900 mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-slate-600 text-sm">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+    
 
-      <Footer />
+      {/* <Footer /> */}
 
       {selectedTemplateId && (
         <TemplatePreview 

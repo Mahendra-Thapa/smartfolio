@@ -28,7 +28,7 @@ export default function MyPortfolios() {
     setLoading(true);
 
     axiosAuthInstance
-      .get("/api/portfolios")
+      .get("/api/portfolio/me")
       .then(res => {
         // Normalize API Data (VERY IMPORTANT)
         const normalized = res.data.map((p: any) => ({

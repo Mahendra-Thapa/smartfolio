@@ -20,6 +20,9 @@ import RoleProtectedRoute from "./utils/RoleProtectedRoute";
 import AdminLayout from "./components/admin/layouts/AdminLayout";
 import UserList from "./pages/admin/UserList";
 import Test from "./pages/Test";
+import PreviewTemplate from "./components/preview/PreviewTemplate";
+import AdminTemplates from "./pages/admin/AdminTemplates";
+import Settings from "./pages/admin/Settings";
 
 function Router() {
   return (
@@ -77,6 +80,11 @@ function Router() {
           <ViewPortfolio />
         </RoleProtectedRoute>
       </Route>
+      <Route path="/preview/:templateId">
+        <RoleProtectedRoute>
+          <PreviewTemplate />
+        </RoleProtectedRoute>
+      </Route>
 
       {/* Admin Routes */}
       <Route path="/admin/dashboard">
@@ -90,6 +98,20 @@ function Router() {
         <RoleProtectedRoute>
           <AdminLayout>
             <UserList />
+          </AdminLayout>
+        </RoleProtectedRoute>
+      </Route>
+      <Route path="/admin/templates">
+        <RoleProtectedRoute>
+          <AdminLayout>
+            <AdminTemplates />
+          </AdminLayout>
+        </RoleProtectedRoute>
+      </Route>
+      <Route path="/admin/settings">
+        <RoleProtectedRoute>
+          <AdminLayout>
+            <Settings />
           </AdminLayout>
         </RoleProtectedRoute>
       </Route>

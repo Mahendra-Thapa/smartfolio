@@ -417,7 +417,7 @@ export default function CreatePortfolio() {
             ))}
           </div>
 
-          <div className="flex justify-between text-sm text-slate-600">
+          <div className="flex justify-between text-sm text-slate-600 dark:text-white">
             <span>Personal Info</span>
             <span>Education & Skills</span>
             <span>Experience & project</span>
@@ -436,7 +436,7 @@ export default function CreatePortfolio() {
               {/* Personal Image */}
 
               <div className="mt-6">
-                <label className="block text-sm font-semibold text-slate-900 mb-3">
+                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-3">
                   Personal Image
                 </label>
 
@@ -486,7 +486,7 @@ export default function CreatePortfolio() {
                   </label>
 
                   {/* Button text */}
-                  <span className="text-sm text-slate-600">
+                  <span className="text-sm text-slate-600 dark:text-white">
                     {portfolio.personalImagePreview
                       ? "Click image to change"
                       : "Click to upload profile photo"}
@@ -495,7 +495,7 @@ export default function CreatePortfolio() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                <label className="block text-sm font-semibold text-slate-900 mb-2 dark:text-white">
                   Full Name *
                 </label>
                 <input
@@ -514,7 +514,7 @@ export default function CreatePortfolio() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                   Professional Title *
                 </label>
                 <input
@@ -533,21 +533,19 @@ export default function CreatePortfolio() {
               </div>
 
               <PortfolioField
-  field={{
-    key: "introduction",
-    label: "Introduction",
-    placeholder: "Tell us about yourself...",
-    rows: 4,
-  }}
-  value={portfolio.intro}
-  onChange={(val : any) => updatePortfolio("intro", val)}
-/>
-
-              
+                field={{
+                  key: "introduction",
+                  label: "Introduction",
+                  placeholder: "Tell us about yourself...",
+                  rows: 4,
+                }}
+                value={portfolio.intro}
+                onChange={(val: any) => updatePortfolio("intro", val)}
+              />
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                     Email *
                   </label>
                   <input
@@ -565,7 +563,7 @@ export default function CreatePortfolio() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                     Owner Email *
                   </label>
                   <input
@@ -586,7 +584,7 @@ export default function CreatePortfolio() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                     Phone *
                   </label>
                   <input
@@ -679,7 +677,7 @@ export default function CreatePortfolio() {
                         placeholder="Year of Graduation"
                         className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                       />
-                      <input
+                      {/* <input
                         disabled={saving}
                         type="text"
                         value={edu.details}
@@ -688,8 +686,20 @@ export default function CreatePortfolio() {
                         }
                         placeholder="Education Details"
                         className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                      />
+                      /> */}
                     </div>
+                    <PortfolioField
+                      field={{
+                        key: "education",
+                        label: "Education Details",
+                        placeholder: "Tell us about education details",
+                        rows: 4,
+                      }}
+                      value={edu.details}
+                      onChange={(val: any) =>
+                        updateEducation(idx, "details", val)
+                      }
+                    />
                     <button
                       disabled={saving}
                       onClick={() => removeEducation(idx)}
@@ -862,7 +872,7 @@ export default function CreatePortfolio() {
                     placeholder="Duration (e.g., Jan 2020 - Dec 2021)"
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 mb-4"
                   />
-                  <textarea
+                  {/* <textarea
                     disabled={saving}
                     value={exp.description}
                     onChange={e =>
@@ -871,6 +881,19 @@ export default function CreatePortfolio() {
                     placeholder="Job description and achievements"
                     rows={3}
                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 mb-4"
+                  /> */}
+
+                  <PortfolioField
+                    field={{
+                      key: "experienceDetails",
+                      label: "Experience Details",
+                      placeholder: "Tell us about experience details...",
+                      rows: 4,
+                    }}
+                    value={exp.description}
+                    onChange={(val: any) =>
+                      updateExperience(idx, "description", val)
+                    }
                   />
                   <button
                     disabled={saving}
@@ -887,7 +910,7 @@ export default function CreatePortfolio() {
               <label className="block text-sm font-semibold text-slate-900 dark:text-white mb-2 justify-end">
                 Additional Experience
               </label>
-              <textarea
+              {/* <textarea
                 disabled={saving}
                 value={portfolio.additionalExperience}
                 onChange={e =>
@@ -896,6 +919,18 @@ export default function CreatePortfolio() {
                 rows={4}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                 placeholder="Add any other relevant experience or achievements..."
+              /> */}
+              <PortfolioField
+                field={{
+                  key: "additionalExperience",
+                  label: "Additional Experience",
+                  placeholder: "Tell us about additional experience...",
+                  rows: 4,
+                }}
+                value={portfolio.additionalExperience}
+                onChange={(val: any) =>
+                  updatePortfolio("additionalExperience", val)
+                }
               />
             </div>
             <div className="max-w-2xl mx-auto mb-8 mt-4">
@@ -1022,7 +1057,7 @@ export default function CreatePortfolio() {
                       />
                     </div>
 
-                    <textarea
+                    {/* <textarea
                       disabled={saving}
                       value={project.description}
                       onChange={e =>
@@ -1031,7 +1066,22 @@ export default function CreatePortfolio() {
                       placeholder="Project description, features, achievements"
                       rows={3}
                       className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 mb-4"
-                    />
+                    /> */}
+
+                    <div className="mb-4">
+                      <PortfolioField
+                        field={{
+                          key: "projectDescription",
+                          label: "Project Description",
+                          placeholder: "Tell us about project description...",
+                          rows: 4,
+                        }}
+                        value={project.description}
+                        onChange={(val: any) =>
+                          updateProject(idx, "description", val)
+                        }
+                      />
+                    </div>
 
                     <input
                       disabled={saving}

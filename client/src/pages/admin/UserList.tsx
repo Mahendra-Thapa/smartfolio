@@ -159,7 +159,7 @@ const UserList = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden ">
         {loading ? (
           <div className="p-6 text-center text-slate-500">Loading users...</div>
         ) : users.length === 0 ? (
