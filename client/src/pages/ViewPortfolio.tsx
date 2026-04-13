@@ -136,7 +136,14 @@ export default function ViewPortfolio() {
   }
 
   const renderTemplate = () => {
-    const templateProps = { portfolio, template, colorScheme, customColors, theme: portfolioTheme };
+    const templateProps = {
+      portfolio,
+      template,
+      colorScheme,
+      customColors,
+      theme: portfolioTheme,
+      onThemeToggle: togglePortfolioTheme,
+    };
 
     switch (template.id) {
       case "professional":

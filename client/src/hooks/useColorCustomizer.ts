@@ -13,7 +13,7 @@ export const DEFAULT_COLORS: CustomColors = {
 };
 
 export function useColorCustomizer(portfolioId: string) {
-  const [colors, setColors] = useState<CustomColors>(DEFAULT_COLORS);
+  const [colors, setColors] = useState<CustomColors | null>(null);
 
   // Load colors from localStorage
   useEffect(() => {
@@ -22,21 +22,23 @@ export function useColorCustomizer(portfolioId: string) {
       try {
         setColors(JSON.parse(stored));
       } catch {
-        setColors(DEFAULT_COLORS);
+        setColors(null);
       }
+    } else {
+      setColors(null);
     }
   }, [portfolioId]);
 
   // Save colors to localStorage
   const updateColor = (key: keyof CustomColors, value: string) => {
-    const newColors = { ...colors, [key]: value };
+    const newColors = { ...(colors || DEFAULT_COLORS), [key]: value };
     setColors(newColors);
     localStorage.setItem(`portfolio-colors-${portfolioId}`, JSON.stringify(newColors));
   };
 
   // Reset to defaults
   const resetColors = () => {
-    setColors(DEFAULT_COLORS);
+    setColors(null);
     localStorage.removeItem(`portfolio-colors-${portfolioId}`);
   };
 

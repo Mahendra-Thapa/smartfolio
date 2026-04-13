@@ -7,7 +7,9 @@ import {
   GraduationCap,
   Mail,
   Menu,
+  Moon,
   Phone,
+  Sun,
   X,
 } from "lucide-react";
 import { useState } from "react";
@@ -91,8 +93,9 @@ interface PortfolioTemplateProps {
   portfolio: Portfolio;
   template: (typeof TEMPLATES)[0];
   colorScheme: (typeof TEMPLATES)[0]["colorSchemes"][0];
-  customColors?: { primary: string; secondary: string; accent: string };
+  customColors?: { primary: string; secondary: string; accent: string } | null;
   theme?: "light" | "dark";
+  onThemeToggle?: () => void;
 }
 
 // Animated Section Component
@@ -140,6 +143,7 @@ export function ProfessionalTemplate({
   colorScheme,
   customColors,
   theme = "light",
+  onThemeToggle,
 }: PortfolioTemplateProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const heroRef = useScrollAnimation();
@@ -196,16 +200,38 @@ export function ProfessionalTemplate({
               ))}
             </nav>
 
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
+            <div className="hidden md:flex items-center gap-2">
+              {onThemeToggle && (
+                <button
+                  onClick={onThemeToggle}
+                  className={`p-2 rounded-lg transition-colors ${isDark ? "bg-slate-800 hover:bg-slate-700 text-yellow-400" : "bg-slate-100 hover:bg-slate-200 text-slate-700"}`}
+                  title={`Switch to ${isDark ? "light" : "dark"} mode`}
+                >
+                  {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </button>
               )}
-            </button>
+            </div>
+
+            <div className="flex items-center gap-2 md:hidden">
+              {onThemeToggle && (
+                <button
+                  onClick={onThemeToggle}
+                  className={`p-2 rounded-lg transition-colors ${isDark ? "bg-slate-800 hover:bg-slate-700 text-yellow-400" : "bg-slate-100 hover:bg-slate-200 text-slate-700"}`}
+                >
+                  {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </button>
+              )}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
+              </button>
+            </div>
           </div>
 
           {mobileMenuOpen && (
@@ -516,6 +542,7 @@ export function ModernTemplate({
   portfolio,
   colorScheme,
   theme = "light",
+  onThemeToggle,
 }: PortfolioTemplateProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const heroRef = useScrollAnimation();
@@ -558,17 +585,40 @@ export function ModernTemplate({
               ))}
             </nav>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-white"
-            >
-              {mobileMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
+            {/* Desktop Theme Toggle */}
+            <div className="hidden md:flex items-center">
+              {onThemeToggle && (
+                <button
+                  onClick={onThemeToggle}
+                  className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  title={`Switch to ${isDark ? "light" : "dark"} mode`}
+                >
+                  {isDark ? <Sun className="w-5 h-5 text-yellow-300" /> : <Moon className="w-5 h-5" />}
+                </button>
               )}
-            </button>
+            </div>
+
+            {/* Mobile Buttons */}
+            <div className="flex items-center gap-2 md:hidden">
+              {onThemeToggle && (
+                <button
+                  onClick={onThemeToggle}
+                  className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                >
+                  {isDark ? <Sun className="w-5 h-5 text-yellow-300" /> : <Moon className="w-5 h-5" />}
+                </button>
+              )}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-white"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Mobile Navigation */}
@@ -908,6 +958,7 @@ export function CreativeTemplate({
   portfolio,
   colorScheme,
   theme = "light",
+  onThemeToggle,
 }: PortfolioTemplateProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const heroRef = useScrollAnimation();
@@ -956,18 +1007,43 @@ export function CreativeTemplate({
               ))}
             </nav>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2"
-              style={{ color: colorScheme.primary }}
-            >
-              {mobileMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
+            {/* Desktop Theme Toggle */}
+            <div className="hidden md:flex items-center">
+              {onThemeToggle && (
+                <button
+                  onClick={onThemeToggle}
+                  className={`p-2 rounded-lg transition-colors ${isDark ? "bg-slate-800 hover:bg-slate-700 text-yellow-400" : "bg-slate-100 hover:bg-slate-200"}`}
+                  style={!isDark ? { color: colorScheme.primary } : {}}
+                  title={`Switch to ${isDark ? "light" : "dark"} mode`}
+                >
+                  {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </button>
               )}
-            </button>
+            </div>
+
+            {/* Mobile Buttons */}
+            <div className="flex items-center gap-2 md:hidden">
+              {onThemeToggle && (
+                <button
+                  onClick={onThemeToggle}
+                  className={`p-2 rounded-lg transition-colors ${isDark ? "bg-slate-800 text-yellow-400" : "bg-slate-100"}`}
+                  style={!isDark ? { color: colorScheme.primary } : {}}
+                >
+                  {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </button>
+              )}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2"
+                style={{ color: colorScheme.primary }}
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Mobile Navigation */}
@@ -1380,7 +1456,7 @@ export function CreativeTemplate({
                 />
               </div>
 
-              <h3 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-br from-black to-zinc-700 bg-clip-text text-transparent">
+              <h3 className={`text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-br from-black to-zinc-700 bg-clip-text text-transparent ${isDark ? "text-white" : ""}`}>
                 Let's Create Something
                 <span
                   className="block -mt-2"
@@ -1473,6 +1549,7 @@ export function DeveloperTemplate({
   portfolio,
   colorScheme,
   theme = "light",
+  onThemeToggle,
 }: PortfolioTemplateProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isDark = theme === "dark";
@@ -1514,16 +1591,40 @@ export function DeveloperTemplate({
               ))}
             </nav>
 
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`md:hidden p-2 ${isDark ? "text-slate-300" : "text-slate-600"}`}
-            >
-              {mobileMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
+            {/* Desktop Theme Toggle */}
+            <div className="hidden md:flex items-center">
+              {onThemeToggle && (
+                <button
+                  onClick={onThemeToggle}
+                  className={`p-2 rounded-lg transition-colors ${isDark ? "bg-slate-800 hover:bg-slate-700 text-yellow-400" : "bg-slate-100 hover:bg-slate-200 text-slate-700"}`}
+                  title={`Switch to ${isDark ? "light" : "dark"} mode`}
+                >
+                  {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </button>
               )}
-            </button>
+            </div>
+
+            {/* Mobile Buttons */}
+            <div className="flex items-center gap-2 md:hidden">
+              {onThemeToggle && (
+                <button
+                  onClick={onThemeToggle}
+                  className={`p-2 rounded-lg transition-colors ${isDark ? "bg-slate-800 text-yellow-400" : "bg-slate-100 text-slate-700"}`}
+                >
+                  {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </button>
+              )}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className={`p-2 ${isDark ? "text-slate-300" : "text-slate-600"}`}
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
+              </button>
+            </div>
           </div>
 
           {mobileMenuOpen && (

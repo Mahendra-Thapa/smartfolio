@@ -1,4 +1,5 @@
 import { Portfolio } from "./storage";
+import { TEMPLATES_CODE } from "./generatedTemplateStrings";
 
 export function generateNextJsProject(portfolio: Portfolio) {
   const projectName = portfolio.name.toLowerCase().replace(/\s+/g, "-");
@@ -19,6 +20,7 @@ export function generateNextJsProject(portfolio: Portfolio) {
       "react-dom": "^18.2.0",
       next: "^14.0.0",
       "next-themes": "^0.2.1",
+      "lucide-react": "^0.292.0"
     },
     devDependencies: {
       typescript: "^5.0.0",
@@ -44,6 +46,7 @@ module.exports = nextConfig;
   // Generate tailwind.config.js
   const tailwindConfig = `/** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -80,144 +83,28 @@ body {
 }
 `;
 
-  // Generate portfolio page component
-  const portfolioComponent = `'use client';
+  // Generate theme toggle component
+  const themeToggleTsx = `'use client';
+import { useTheme } from 'next-themes';
+import { Moon, Sun } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import React from 'react';
-import Link from 'next/link';
+export default function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-const portfolio = {
-  name: '${portfolio.name}',
-  title: '${portfolio.title}',
-  intro: \`${portfolio.intro}\`,
-  email: '${portfolio.email}',
-  phone: '${portfolio.phone}',
-  education: ${JSON.stringify(portfolio.education, null, 2)},
-  skills: ${JSON.stringify(portfolio.skills, null, 2)},
-  experience: ${JSON.stringify(portfolio.experience, null, 2)},
-};
+  useEffect(() => setMounted(true), []);
 
-export default function Portfolio() {
+  if (!mounted) return null;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            {portfolio.name}
-          </h1>
-          <div className="flex gap-8">
-            {['About', 'Skills', 'Experience', 'Contact'].map((item) => (
-              <a
-                key={item}
-                href={\`#\${item.toLowerCase()}\`}
-                className="text-slate-600 hover:text-slate-900 font-medium transition"
-              >
-                {item}
-              </a>
-            ))}
-          </div>
-        </nav>
-      </header>
-
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="max-w-3xl">
-          <h2 className="text-6xl font-bold text-slate-900 mb-4">{portfolio.name}</h2>
-          <p className="text-2xl text-blue-600 font-semibold mb-6">{portfolio.title}</p>
-          <p className="text-lg text-slate-600 leading-relaxed mb-8">{portfolio.intro}</p>
-          <div className="flex gap-4">
-            <a
-              href={\`mailto:\${portfolio.email}\`}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
-            >
-              Get In Touch
-            </a>
-            <a
-              href={\`tel:\${portfolio.phone}\`}
-              className="px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition"
-            >
-              Call Me
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="bg-white py-20">
-        <div className="container mx-auto px-4">
-          <h3 className="text-4xl font-bold text-slate-900 mb-8">About Me</h3>
-          <p className="text-lg text-slate-600 leading-relaxed max-w-3xl">{portfolio.intro}</p>
-        </div>
-      </section>
-
-      {/* Skills Section */}
-      {portfolio.skills.length > 0 && (
-        <section id="skills" className="py-20">
-          <div className="container mx-auto px-4">
-            <h3 className="text-4xl font-bold text-slate-900 mb-8">Skills</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {portfolio.skills.map((skill, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 hover:shadow-lg transition"
-                >
-                  <p className="font-semibold text-slate-900">{skill}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Experience Section */}
-      {portfolio.experience.length > 0 && (
-        <section id="experience" className="bg-white py-20">
-          <div className="container mx-auto px-4">
-            <h3 className="text-4xl font-bold text-slate-900 mb-8">Experience</h3>
-            <div className="space-y-8 max-w-3xl">
-              {portfolio.experience.map((exp, idx) => (
-                <div key={idx} className="border-l-4 border-blue-600 pl-6">
-                  <h4 className="text-2xl font-bold text-slate-900">{exp.position}</h4>
-                  <p className="text-slate-600 font-semibold">{exp.company}</p>
-                  <p className="text-sm text-slate-500 mb-3">{exp.duration}</p>
-                  <p className="text-slate-700">{exp.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Contact Section */}
-      <section id="contact" className="py-20 bg-gradient-to-br from-blue-600 to-purple-600">
-        <div className="container mx-auto px-4 text-center">
-          <h3 className="text-4xl font-bold text-white mb-6">Let's Connect</h3>
-          <p className="text-blue-100 text-lg mb-8">Feel free to reach out for any opportunities or collaborations.</p>
-          <div className="flex gap-4 justify-center">
-            <a
-              href={\`mailto:\${portfolio.email}\`}
-              className="px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition"
-            >
-              Email Me
-            </a>
-            <a
-              href={\`tel:\${portfolio.phone}\`}
-              className="px-8 py-3 border-2 border-white text-white rounded-lg font-semibold hover:bg-white/10 transition"
-            >
-              Call Me
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-slate-900 text-white py-8">
-        <div className="container mx-auto px-4 text-center">
-          <p>© 2024 {portfolio.name}. All rights reserved.</p>
-          <p className="text-slate-400 text-sm mt-2">Built with Next.js & Tailwind CSS</p>
-        </div>
-      </footer>
+    <div className="fixed bottom-6 right-6 z-[100]">
+      <button
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        className="p-3 rounded-full bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700 hover:scale-110 transition-transform"
+      >
+        {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-slate-700" />}
+      </button>
     </div>
   );
 }
@@ -225,6 +112,7 @@ export default function Portfolio() {
 
   // Generate layout.tsx
   const layoutTsx = `import type { Metadata } from 'next';
+import { ThemeProvider } from '@/components/ThemeProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -238,18 +126,64 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
 `;
 
   // Generate page.tsx
-  const pageTsx = `import Portfolio from './portfolio';
+  const pageTsx = `'use client';
+
+import React from 'react';
+import { useTheme } from 'next-themes';
+import { ProfessionalTemplate, ModernTemplate, CreativeTemplate, DeveloperTemplate, TEMPLATES } from '@/components/PortfolioTemplates';
+import ThemeToggle from '@/components/ThemeToggle';
+
+const portfolioInfo = ${JSON.stringify(portfolio, null, 2)};
 
 export default function Home() {
-  return <Portfolio />;
+  const { theme: currentTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => setMounted(true), []);
+
+  const templateId = "${portfolio.templateId || 'professional'}";
+  const colorSchemeId = "${portfolio.colorScheme || 'blue'}";
+  
+  const templateObj = TEMPLATES.find(t => t.id === templateId) || TEMPLATES[0];
+  const colorSchemeObj = templateObj.colorSchemes.find(s => s.id === colorSchemeId) || templateObj.colorSchemes[0];
+
+  const resolvedTheme = mounted ? (currentTheme === 'dark' ? 'dark' : 'light') : 'light';
+
+  const props = {
+    portfolio: portfolioInfo,
+    template: templateObj,
+    colorScheme: colorSchemeObj,
+    theme: resolvedTheme,
+    customColors: null,
+  };
+
+  const renderTemplate = () => {
+    switch (templateId) {
+      case 'modern': return <ModernTemplate {...props as any} />;
+      case 'creative': return <CreativeTemplate {...props as any} />;
+      case 'developer': return <DeveloperTemplate {...props as any} />;
+      default: return <ProfessionalTemplate {...props as any} />;
+    }
+  };
+
+  return (
+    <>
+      <ThemeToggle />
+      {renderTemplate()}
+    </>
+  );
 }
 `;
 
@@ -375,10 +309,37 @@ Generated by SmartFolio Portfolio Builder
 };`,
       ".gitignore": gitignore,
       "README.md": readme,
+      "src/components/ThemeProvider.tsx": `'use client';
+import { ThemeProvider as NextThemesProvider } from 'next-themes';
+import type { ThemeProviderProps } from 'next-themes';
+
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+}
+`,
+      "src/components/ThemeToggle.tsx": themeToggleTsx,
+      "src/components/PortfolioTemplates.tsx": TEMPLATES_CODE['PortfolioTemplates.tsx'],
+      "src/hooks/useScrollAnimation.ts": TEMPLATES_CODE['useScrollAnimation.ts'],
+      "src/components/ScrollToTop.tsx": `"use client";\nexport default function ScrollToTop() { return null; }\n`,
+      "src/types.ts": `export interface Portfolio {
+  id?: string;
+  name: string;
+  title: string;
+  intro: string;
+  email: string;
+  phone: string;
+  skills: string[];
+  qualifications: string[];
+  education: any[];
+  experience: any[];
+  projects: any[];
+  templateId?: string;
+  colorScheme?: string;
+  personalImage?: string;
+}`,
       "src/app/globals.css": globalsCss,
       "src/app/layout.tsx": layoutTsx,
       "src/app/page.tsx": pageTsx,
-      "src/app/portfolio.tsx": portfolioComponent,
       ".env.local": `# Add your environment variables here
 NEXT_PUBLIC_SITE_NAME="${portfolio.name}"
 `,

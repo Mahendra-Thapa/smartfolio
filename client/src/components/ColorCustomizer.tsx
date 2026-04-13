@@ -40,7 +40,7 @@ export default function ColorCustomizer({ portfolioId, onColorsChange }: ColorCu
 
   const handleColorChange = (key: keyof CustomColors, value: string) => {
     updateColor(key, value);
-    onColorsChange?.({ ...colors, [key]: value });
+    onColorsChange?.({ ...(colors || DEFAULT_COLORS), [key]: value });
   };
 
   const handlePresetSelect = (preset: typeof COLOR_PRESETS[0]) => {
@@ -92,7 +92,9 @@ export default function ColorCustomizer({ portfolioId, onColorsChange }: ColorCu
                 { key: "primary" as const, label: "Primary Color" },
                 { key: "secondary" as const, label: "Secondary Color" },
                 { key: "accent" as const, label: "Accent Color" },
-              ].map(({ key, label }) => (
+              ].map(({ key, label }) => {
+                const activeColors = colors || DEFAULT_COLORS;
+                return (
                 <div key={key}>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     {label}
@@ -100,20 +102,20 @@ export default function ColorCustomizer({ portfolioId, onColorsChange }: ColorCu
                   <div className="flex gap-2">
                     <input
                       type="color"
-                      value={colors[key]}
+                      value={activeColors[key]}
                       onChange={(e) => handleColorChange(key, e.target.value)}
                       className="w-12 h-10 rounded cursor-pointer border border-slate-300 dark:border-slate-600"
                     />
                     <input
                       type="text"
-                      value={colors[key]}
+                      value={activeColors[key]}
                       onChange={(e) => handleColorChange(key, e.target.value)}
                       className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-mono text-sm"
                       placeholder="#000000"
                     />
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
 
             {/* Divider */}
