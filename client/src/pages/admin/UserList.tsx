@@ -128,7 +128,7 @@ const UserList = () => {
         onClick={() => suspendUser(user.id)}
         className="text-red-600 hover:text-red-800"
       >
-        Suspend
+        Suspend button
       </button>
     );
   };
